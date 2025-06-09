@@ -5,9 +5,15 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/main.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 0
+    path: Assets/Scenes/MirrorScene.unity
+    guid: 529c1cdca92448d47a77bc71916f38c5
+  - enabled: 1
+    path: Assets/Scenes/MirrorScene 1.unity
+    guid: b9fb647a26a31b64c9057379eb251c2d
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: ed72be55522c8448bae8b0d66fa21adf,
       type: 2}

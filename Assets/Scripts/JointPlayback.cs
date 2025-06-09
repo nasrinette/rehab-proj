@@ -65,9 +65,9 @@ public class JointPlayback : MonoBehaviour
             int idx = 0;
             f.time = float.Parse(cols[idx++]);
             f.headPos = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
-            f.headRot =  new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
+            f.headRot = Vector3.zero; idx++; idx++; idx++;  //new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             f.leftHandPos = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
-            f.leftHandRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
+            f.leftHandRot = Vector3.zero; idx++; idx++; idx++;  //new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             f.rightHandPos = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             f.rightHandRot = Vector3.zero; idx++; idx++; idx++; //new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             frames.Add(f);
