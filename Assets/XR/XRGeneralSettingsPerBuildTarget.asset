@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-5174981653687337723
+--- !u!114 &-3951967056675247530
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -17,21 +17,7 @@ MonoBehaviour:
   m_AutomaticRunning: 0
   m_Loaders:
   - {fileID: 11400000, guid: 6d4cb15ed5e874630824fc8753b738b7, type: 2}
---- !u!114 &-3944336818514559863
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d236b7d11115f2143951f1e14045df39, type: 3}
-  m_Name: Android Settings
-  m_EditorClassIdentifier: 
-  m_LoaderManagerInstance: {fileID: -5174981653687337723}
-  m_InitManagerOnStart: 1
---- !u!114 &-3694649414991319372
+--- !u!114 &-2942161858313422359
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -62,9 +48,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.XR.Management.Editor:UnityEditor.XR.Management:XRGeneralSettingsPerBuildTarget
   Keys: 0700000001000000
   Values:
-  - {fileID: -3944336818514559863}
-  - {fileID: 501400987349443910}
---- !u!114 &501400987349443910
+  - {fileID: 6675207787025420460}
+  - {fileID: 8601613310912412526}
+--- !u!114 &6675207787025420460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d236b7d11115f2143951f1e14045df39, type: 3}
+  m_Name: Android Settings
+  m_EditorClassIdentifier: 
+  m_LoaderManagerInstance: {fileID: -3951967056675247530}
+  m_InitManagerOnStart: 1
+--- !u!114 &8601613310912412526
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -76,5 +76,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d236b7d11115f2143951f1e14045df39, type: 3}
   m_Name: Standalone Settings
   m_EditorClassIdentifier: 
-  m_LoaderManagerInstance: {fileID: -3694649414991319372}
+  m_LoaderManagerInstance: {fileID: -2942161858313422359}
   m_InitManagerOnStart: 1
