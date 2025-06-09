@@ -91,8 +91,10 @@ public class HandRayInteractor : MonoBehaviour
         if (gameObject != null && rightHand != null)
         {
             gameObject.transform.SetParent(rightHand);
-            gameObject.transform.localPosition = Vector3.zero;
-            gameObject.transform.localRotation = Quaternion.identity;
+            //gameObject.transform.localPosition = Vector3.zero;
+            //gameObject.transform.localRotation = Quaternion.identity;
+            gameObject.transform.localPosition = new Vector3(0f, -0.03f, 0.01f);
+            gameObject.transform.localRotation = Quaternion.Euler(0f, -100f, 0f);
         }
     }
 
@@ -104,6 +106,7 @@ public class HandRayInteractor : MonoBehaviour
         lineRenderer.endWidth = rayWidth * 0.5f;
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
         lineRenderer.positionCount = 2;
+        lineRenderer.sortingOrder = 10;
 
         // Create hit indicator (small sphere at ray hit point)
         hitIndicator = GameObject.CreatePrimitive(PrimitiveType.Sphere);
