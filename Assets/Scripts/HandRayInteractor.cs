@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using System.Collections;
 
 /// <summary>
 /// Provides ray-based UI interaction using hand tracking and pinch gestures.
@@ -9,9 +10,9 @@ using System.Collections.Generic;
 /// </summary>
 public class HandRayInteractor : MonoBehaviour
 {
-    [Header("Hand Configuration")]
-    [SerializeField] private OVRHand.Hand handType = OVRHand.Hand.HandLeft;
-    [SerializeField] private OVRHand ovrHand; // Reference to OVRHand component
+    //[Header("Hand Configuration")]
+    //[SerializeField] private OVRHand.Hand handType = OVRHand.Hand.HandLeft;
+    //[SerializeField] private OVRHand ovrHand; // Reference to OVRHand component
 
     [Header("Ray Configuration")]
     [SerializeField] private float rayLength = 10f;
@@ -35,6 +36,13 @@ public class HandRayInteractor : MonoBehaviour
     private PointerEventData pointerEventData;
     private EventSystem eventSystem;
 
+    public Transform rightHand; // Reference to the right hand transform for parenting 
+    //public RaycastHit hit;
+
+    [SerializeField] private Canvas targetCanvas; // Assign in Inspector or find at runtime
+    private GraphicRaycaster graphicRaycaster;
+
+
     void Start()
     {
         // Set up the ray visualization
@@ -51,18 +59,41 @@ public class HandRayInteractor : MonoBehaviour
 
         pointerEventData = new PointerEventData(eventSystem);
 
-        // Find OVRHand if not assigned
-        if (ovrHand == null)
-        {
-            ovrHand = GetComponentInParent<OVRHand>();
-            if (ovrHand == null)
-            {
-                Debug.LogError($"HandRayInteractor on {gameObject.name} couldn't find OVRHand component!");
-            }
-        }
+        //// Find OVRHand if not assigned
+        //if (ovrHand == null)
+        //{
+        //    ovrHand = GetComponentInParent<OVRHand>();
+        //    if (ovrHand == null)
+        //    {
+        //        Debug.LogError($"HandRayInteractor on {gameObject.name} couldn't find OVRHand component!");
+        //    }
+        //}
 
         // Set ray origin (usually from the hand transform)
         rayOrigin = transform;
+        if (targetCanvas == null)
+            targetCanvas = FindObjectOfType<Canvas>(); // fallback
+
+        graphicRaycaster = targetCanvas.GetComponent<GraphicRaycaster>();
+
+
+        StartCoroutine(AssignJointsAfterDelay());
+    }
+
+    private IEnumerator AssignJointsAfterDelay()
+    {
+        yield return new WaitForSeconds(5f);
+
+
+        if (rightHand == null) rightHand = transform.parent.Find("Joint RightHandIndexProximal");
+
+        // make rightHandLineRenderer child of righthand
+        if (gameObject != null && rightHand != null)
+        {
+            gameObject.transform.SetParent(rightHand);
+            gameObject.transform.localPosition = Vector3.zero;
+            gameObject.transform.localRotation = Quaternion.identity;
+        }
     }
 
     void SetupRayVisualization()
@@ -76,7 +107,7 @@ public class HandRayInteractor : MonoBehaviour
 
         // Create hit indicator (small sphere at ray hit point)
         hitIndicator = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        hitIndicator.name = $"{handType}Hand_HitIndicator";
+        hitIndicator.name = $"R_Hand_HitIndicator";
         hitIndicator.transform.localScale = Vector3.one * 0.02f;
         hitIndicator.GetComponent<Collider>().enabled = false;
 
@@ -88,62 +119,125 @@ public class HandRayInteractor : MonoBehaviour
         hitIndicator.SetActive(false);
     }
 
-    void Update()
+   void Update()
     {
-        if (ovrHand == null || !ovrHand.IsTracked)
-        {
-            // Hide ray when hand isn't tracked
-            lineRenderer.enabled = false;
-            hitIndicator.SetActive(false);
-            return;
-        }
-
         // Show ray when hand is tracked
         lineRenderer.enabled = true;
 
-        // Perform raycast
-        bool hitSomething = PerformRaycast(out RaycastHit hit);
+        // Perform UI raycast
+        GameObject hitObject;
+        Vector3 hitPoint;
+        bool hitSomething = PerformRaycast(out hitObject, out hitPoint);
 
         // Update ray visualization
-        UpdateRayVisualization(hit, hitSomething);
+        UpdateRayVisualization(hitPoint, hitSomething);
 
         // Check for pinch
         bool isPinching = IsPinching();
 
         // Handle interactions
-        HandleInteraction(hit, hitSomething, isPinching);
+        HandleInteraction(hitObject, hitSomething, isPinching, hitPoint);
 
         // Update pinch state for next frame
         wasPinching = isPinching;
     }
 
-    bool PerformRaycast(out RaycastHit hit)
-    {
-        Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
 
-        // First try to hit UI elements in world space
-        if (Physics.Raycast(ray, out hit, rayLength, uiLayerMask))
+    //bool PerformRaycast(out RaycastHit hit)
+    //{
+    //    Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
+
+    //    // First try to hit UI elements in world space
+    //    if (Physics.Raycast(ray, out hit, rayLength, uiLayerMask))
+    //    {
+    //        // Check if hit object has a UI component
+    //        if (hit.collider.GetComponent<Graphic>() != null)
+    //        {
+    //            return true;
+    //        }
+    //    }
+
+    //    return false;
+    //}
+
+    // Returns true if any Button is hit, and outputs the closest Button's RaycastHit
+    //bool PerformRaycast(out RaycastHit hit)
+    //{
+    //    Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
+    //    //RaycastHit[] hits = Physics.RaycastAll(ray, rayLength, uiLayerMask);
+
+    //    // add graphic raycaster for ui
+
+
+    //    float closestDistance = float.MaxValue;
+    //    hit = default;
+    //    bool foundButton = false;
+
+    //    foreach (var h in hits)
+    //    {
+    //        Debug.Log($"Hit: {h.collider.name} at {h.point}");
+    //        if (h.collider.GetComponent<Button>() != null)
+    //        {
+    //            float dist = Vector3.Distance(ray.origin, h.point);
+    //            if (dist < closestDistance)
+    //            {
+    //                closestDistance = dist;
+    //                hit = h;
+    //                foundButton = true;
+    //            }
+    //        }
+    //    }
+
+    //    return foundButton;
+    //}
+
+    bool PerformRaycast(out GameObject hitObject, out Vector3 hitPoint)
+    {
+        hitObject = null;
+        hitPoint = Vector3.zero;
+
+        // Create a PointerEventData at the ray's screen position
+        Vector3 rayOriginPos = rayOrigin.position;
+        Vector3 rayDirection = rayOrigin.forward;
+
+        // Project a point far along the ray and convert to screen space
+        Vector3 worldPoint = rayOriginPos + rayDirection * rayLength;
+        Vector2 screenPoint = Camera.main.WorldToScreenPoint(worldPoint);
+
+        pointerEventData.position = screenPoint;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        graphicRaycaster.Raycast(pointerEventData, results);
+
+        foreach (var result in results)
         {
-            // Check if hit object has a UI component
-            if (hit.collider.GetComponent<Graphic>() != null)
+            Debug.Log($"Hit UI Element: {result.gameObject.name} at {result.worldPosition}");
+            Button button = result.gameObject.GetComponent<Button>();
+            if (button != null)
             {
+                hitObject = result.gameObject;
+                // Try to get the world position of the hit (approximate)
+                RectTransform rect = hitObject.GetComponent<RectTransform>();
+                if (rect != null)
+                    hitPoint = rect.position;
                 return true;
             }
         }
-
         return false;
     }
 
-    void UpdateRayVisualization(RaycastHit hit, bool hitSomething)
+
+
+    void UpdateRayVisualization(Vector3 hitPoint, bool hitSomething)
     {
         Vector3 startPoint = rayOrigin.position;
         Vector3 endPoint;
 
         if (hitSomething)
         {
-            endPoint = hit.point;
+            endPoint = hitPoint;
             hitIndicator.SetActive(true);
-            hitIndicator.transform.position = hit.point;
+            hitIndicator.transform.position = hitPoint;
 
             // Update colors based on state
             Color currentColor = rayDefaultColor;
@@ -173,19 +267,15 @@ public class HandRayInteractor : MonoBehaviour
         lineRenderer.SetPosition(1, endPoint);
     }
 
+
     bool IsPinching()
     {
-        if (ovrHand == null) return false;
-
-        // Get pinch strength from OVRHand
-        float pinchStrength = ovrHand.GetFingerPinchStrength(OVRHand.HandFinger.Index);
-        return pinchStrength > pinchThreshold;
+        float triggerValue = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.RTouch);
+        return triggerValue > pinchThreshold;
     }
 
-    void HandleInteraction(RaycastHit hit, bool hitSomething, bool isPinching)
+    void HandleInteraction(GameObject hitObject, bool hitSomething, bool isPinching, Vector3 hitPoint)
     {
-        GameObject hitObject = hitSomething ? hit.collider.gameObject : null;
-
         // Handle hover enter/exit
         if (hitObject != currentHoveredObject)
         {
@@ -210,7 +300,7 @@ public class HandRayInteractor : MonoBehaviour
             // Update pointer position for UI system
             if (hitSomething)
             {
-                pointerEventData.position = Camera.main.WorldToScreenPoint(hit.point);
+                pointerEventData.position = Camera.main.WorldToScreenPoint(hitPoint);
             }
 
             // Pinch started
@@ -233,6 +323,7 @@ public class HandRayInteractor : MonoBehaviour
             }
         }
     }
+
 
     void OnDestroy()
     {

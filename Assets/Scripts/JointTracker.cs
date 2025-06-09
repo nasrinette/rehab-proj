@@ -31,6 +31,7 @@ public class JointTracker : MonoBehaviour
         if (head == null) head = transform.Find("Joint Head");
         if (leftHand == null) leftHand = transform.Find("Joint LeftHandWrist");
         if (rightHand == null) rightHand = transform.Find("Joint RightHandWrist");
+
     }
 
 
