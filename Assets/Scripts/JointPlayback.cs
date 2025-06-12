@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System;
 
 public class JointPlayback : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class JointPlayback : MonoBehaviour
     public Transform head;
     public Transform leftHand;
     public Transform rightHand;
+
+    public string exerciseName = "JointPositions";
 
     private class Frame
     {
@@ -24,8 +27,8 @@ public class JointPlayback : MonoBehaviour
 
     void Start()
     {
-        if (string.IsNullOrEmpty(csvFilePath))
-            csvFilePath = Path.Combine(Application.persistentDataPath, "JointPositions.csv");
+        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "Recordings");
+        csvFilePath = Path.Combine(folderPath, exerciseName + ".csv");
 
         LoadCsv();
         if (playOnStart) isPlaying = true;
@@ -116,4 +119,10 @@ public class JointPlayback : MonoBehaviour
     public void Pause() => isPlaying = false;
     public void Stop() { isPlaying = false; playbackTime = 0f; }
     public void Seek(float time) { playbackTime = time; }
+    public void SetRecordingToPlay(string recordingName)
+    {
+        exerciseName = recordingName;
+        csvFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "Recordings", exerciseName);
+        LoadCsv();
+    }
 }

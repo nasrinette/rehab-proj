@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System.Text;
+using System;
 
 public class JointTracker : MonoBehaviour
 {
@@ -11,14 +12,24 @@ public class JointTracker : MonoBehaviour
     public Transform rightHand;
 
     public string csvFilePath;
+    public string exerciseName = "JointPositions";
 
     void Start()
     {
-        csvFilePath = Path.Combine(Application.persistentDataPath, "JointPositions.csv");
+        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "Recordings");
+
+        // Ensure the directory exists
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+
+        csvFilePath = Path.Combine(folderPath, exerciseName + ".csv");
         WriteCsvHeader();
         StartCoroutine(AssignJointsAfterDelay());
         StartCoroutine(LogJointsPeriodically());
     }
+
 
     void Update()
     {
