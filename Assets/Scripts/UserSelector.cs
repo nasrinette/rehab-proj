@@ -20,4 +20,13 @@ public class UserSelector : MonoBehaviour
         menuPanel.SetActive(false);
         patientPanel.SetActive(true);
     }
+
+    public void OnBackToMenu()
+    {
+        AppState.CurrentUser = UserType.None;
+        menuPanel.SetActive(true);
+        doctorPanel.SetActive(false);
+        patientPanel.SetActive(false);
+    }
+
 }
