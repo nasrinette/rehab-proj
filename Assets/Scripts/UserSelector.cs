@@ -6,12 +6,12 @@ using static Oculus.Avatar2.OvrAvatarEntity;
 public class UserSelector : MonoBehaviour
 {
     [Header("Avatar presets")]
-    [SerializeField] private SampleAvatarEntity mainAvatar;    // drag “MainAvatar” here
-    [SerializeField] private SampleAvatarEntity mirrorAvatar;  // drag “MirrorAvatar” here
+    [SerializeField] private SampleAvatarEntity mainAvatar;    // drag ï¿½MainAvatarï¿½ here
+    [SerializeField] private SampleAvatarEntity mirrorAvatar;  // drag ï¿½MirrorAvatarï¿½ here
     [SerializeField] private int doctorPreset = 0;             // Style-1 presets 0-6
     [SerializeField] private int patientPreset = 2;             // pick any other index
-    [SerializeField] private GameObject mainAvatarGO;    // drag MainAvatar here
-    [SerializeField] private GameObject mirrorAvatarGO;  // drag MirrorAvatar here
+    // [SerializeField] private GameObject mainAvatarGO;    // drag MainAvatar here
+    // [SerializeField] private GameObject mirrorAvatarGO;  // drag MirrorAvatar here
 
     public GameObject menuPanel;
     public GameObject doctorPanel;
@@ -35,8 +35,8 @@ public class UserSelector : MonoBehaviour
     void Start()
     {
         AppState.CurrentUser = UserType.None;
-        mainAvatarGO.SetActive(false);
-        mirrorAvatarGO.SetActive(false);
+        // mainAvatarGO.SetActive(false);
+        // mirrorAvatarGO.SetActive(false);
         ShowOnly(menuPanel, remember:false);
 
 
@@ -70,8 +70,8 @@ public class UserSelector : MonoBehaviour
         AppState.CurrentUser = UserType.Doctor;
 
         // bring avatars back
-        mainAvatarGO.SetActive(true);
-        mirrorAvatarGO.SetActive(true);
+        // mainAvatarGO.SetActive(true);
+        // mirrorAvatarGO.SetActive(true);
 
         SwapPresetOnBoth(doctorPreset);   // your helper from earlier
         ShowOnly(doctorPanel);
@@ -80,8 +80,8 @@ public class UserSelector : MonoBehaviour
     public void OnPatientSelected()
     {
         AppState.CurrentUser = UserType.Patient;
-        mainAvatarGO.SetActive(true);
-        mirrorAvatarGO.SetActive(true);
+        // mainAvatarGO.SetActive(true);
+        // mirrorAvatarGO.SetActive(true);
 
         SwapPresetOnBoth(patientPreset);
         ShowOnly(patientPanel);
@@ -92,8 +92,8 @@ public class UserSelector : MonoBehaviour
     public void OnBackToMenu()
     {
         AppState.CurrentUser = UserType.None;
-        mainAvatarGO.SetActive(false);
-        mirrorAvatarGO.SetActive(false);
+        // mainAvatarGO.SetActive(false);
+        // mirrorAvatarGO.SetActive(false);
         ShowOnly(menuPanel);
     }
 
@@ -124,7 +124,7 @@ public class UserSelector : MonoBehaviour
     public void OnDoctorContinue()
     {
         AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(recordDoctorPanel);
+        ShowOnly(exercisesDoctorPanel);
     }
 
     public void OnDoctorRecord()
@@ -187,7 +187,7 @@ public class UserSelector : MonoBehaviour
         ShowOnly(playFeedBackPatientPanel);
     }
 
-private void ShowOnly(GameObject target, bool remember = true)
+public void ShowOnly(GameObject target, bool remember = true)
     {
         Debug.Log("show only" + target);
         if (target == null) { Debug.Log("null"); return; };
