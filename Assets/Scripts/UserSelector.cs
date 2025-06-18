@@ -38,8 +38,6 @@ public class UserSelector : MonoBehaviour
         // mainAvatarGO.SetActive(false);
         // mirrorAvatarGO.SetActive(false);
         ShowOnly(menuPanel, remember:false);
-
-
     }
 
     public void OnBack() => GoBack();
@@ -97,6 +95,12 @@ public class UserSelector : MonoBehaviour
         ShowOnly(menuPanel);
     }
 
+    public void OnBackToDoctor()
+    {
+        AppState.CurrentUser = UserType.Doctor;
+        ShowOnly(doctorPanel);
+    }
+
     public void OnDoctorExercises()
     {
         AppState.CurrentUser = UserType.Doctor;
@@ -112,7 +116,7 @@ public class UserSelector : MonoBehaviour
     public void OnDoctorEdit()
     {
         AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(recordDoctorPanel);
+        ShowOnly(recordDoctorPanel); //change to playDoctorPanel
     }
 
     public void OnNewExercises()
@@ -124,7 +128,7 @@ public class UserSelector : MonoBehaviour
     public void OnDoctorContinue()
     {
         AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(exercisesDoctorPanel);
+        ShowOnly(recordDoctorPanel);
     }
 
     public void OnDoctorRecord()
