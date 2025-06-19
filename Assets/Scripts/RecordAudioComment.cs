@@ -46,7 +46,6 @@ public class RecordAudio : MonoBehaviour
         }
     }
 
-
     public void StopRecording()
     {
         Microphone.End(null);
@@ -78,9 +77,6 @@ public class RecordAudio : MonoBehaviour
             Debug.LogError("No recording found to save.");
         }
     }
-
-
-
 
     private AudioClip TrimClip(AudioClip clip, float length)
     { 
