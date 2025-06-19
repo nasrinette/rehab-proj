@@ -27,8 +27,9 @@ public class JointPlayback : MonoBehaviour
 
     void Start()
     {
-        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "Recordings");
+        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "MovementRecordings");
         csvFilePath = Path.Combine(folderPath, exerciseName + ".csv");
+
 
         LoadCsv();
         if (playOnStart) isPlaying = true;
@@ -36,16 +37,17 @@ public class JointPlayback : MonoBehaviour
 
     void Update()
     {
-        if (!isPlaying || frames.Count == 0)
-            return;
+        if (!isPlaying || frames.Count == 0) { }
+        else { 
 
-        playbackTime += Time.deltaTime;
+            playbackTime += Time.deltaTime;
 
-        // Find the closest frame by time
-        Frame frame = GetFrameForTime(playbackTime);
-        if (frame != null)
-        {
-            ApplyFrame(frame);
+            // Find the closest frame by time
+            Frame frame = GetFrameForTime(playbackTime);
+            if (frame != null)
+            {
+                ApplyFrame(frame);
+            }
         }
     }
 
@@ -56,25 +58,30 @@ public class JointPlayback : MonoBehaviour
         {
             Debug.LogWarning("CSV file not found: " + csvFilePath);
             return;
+        } else
+        {
+            Debug.Log(Equals(csvFilePath, "csvFilePath") + " csvFilePath: " + csvFilePath);
         }
 
         var lines = File.ReadAllLines(csvFilePath);
         for (int i = 1; i < lines.Length; i++) // skip header
         {
             var cols = lines[i].Split(',');
-            if (cols.Length < 19) continue;
+            if (cols.Length != 19) Debug.LogError("wrong format for playback");
 
             Frame f = new Frame();
             int idx = 0;
             f.time = float.Parse(cols[idx++]);
             f.headPos = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
-            f.headRot = Vector3.zero; idx++; idx++; idx++;  //new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
+            //f.headRot = Vector3.zero; idx++; idx++; idx++;  //
+            f.headRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             f.leftHandPos = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
-            f.leftHandRot = Vector3.zero; idx++; idx++; idx++;  //new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
+            //f.leftHandRot = Vector3.zero; idx++; idx++; idx++;
+            f.leftHandRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             f.rightHandPos = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
-            f.rightHandRot = Vector3.zero; idx++; idx++; idx++; //new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
+            //f.rightHandRot = Vector3.zero; idx++; idx++; idx++; 
+            f.rightHandRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             frames.Add(f);
-            //Vector3.zero; idx++; idx++; idx++;
         }
     }
 
@@ -121,8 +128,9 @@ public class JointPlayback : MonoBehaviour
     public void Seek(float time) { playbackTime = time; }
     public void SetRecordingToPlay(string recordingName)
     {
+        if (isPlaying) Stop(); // Stop current playback if it's in progress
         exerciseName = recordingName;
-        csvFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "Recordings", exerciseName);
+        csvFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "MovementRecordings", exerciseName);
         LoadCsv();
     }
 }
