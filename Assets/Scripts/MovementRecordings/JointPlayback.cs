@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System;
+using Oculus.Avatar2;
+
 
 public class JointPlayback : MonoBehaviour
 {
@@ -11,6 +13,11 @@ public class JointPlayback : MonoBehaviour
     public Transform rightHand;
 
     public string exerciseName = "JointPositions";
+
+    public GameObject entityGO;
+    //public  manual, auto;
+    public OvrAvatarInputManager manual, auto;
+    public SampleAvatarEntity entityAvatarRef;
 
     private class Frame
     {
@@ -27,12 +34,12 @@ public class JointPlayback : MonoBehaviour
 
     void Start()
     {
-        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "MovementRecordings");
-        csvFilePath = Path.Combine(folderPath, exerciseName + ".csv");
-
-
-        LoadCsv();
-        if (playOnStart) isPlaying = true;
+        entityAvatarRef = entityGO.GetComponent<SampleAvatarEntity>();
+        if (playOnStart)
+        {
+            SetRecordingToPlay(exerciseName);
+            isPlaying = true;
+        }
     }
 
     void Update()
@@ -124,7 +131,7 @@ public class JointPlayback : MonoBehaviour
     // Optional: public controls
     public void Play() => isPlaying = true;
     public void Pause() => isPlaying = false;
-    public void Stop() { isPlaying = false; playbackTime = 0f; }
+    public void Stop() { isPlaying = false; playbackTime = 0f; entityAvatarRef.SetInputManager(auto); }
     public void Seek(float time) { playbackTime = time; }
     public void SetRecordingToPlay(string recordingName)
     {
@@ -132,5 +139,7 @@ public class JointPlayback : MonoBehaviour
         exerciseName = recordingName;
         csvFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "MovementRecordings", exerciseName);
         LoadCsv();
+
+        entityAvatarRef.SetInputManager(manual);
     }
 }

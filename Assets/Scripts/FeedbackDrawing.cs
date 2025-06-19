@@ -26,8 +26,21 @@ public class FeedbackDrawing : MonoBehaviour
     private LineRenderer currentLine;
     private List<LineRenderer> allLines = new List<LineRenderer>();
     private List<RecordedPoint> recordedPoints = new List<RecordedPoint>();
-    public string exerciseName = "DrawingExercise";
     private int currentLineId = 0;
+    public float feedbackTimestamp = 0f;
+
+    public string exerciseName;
+    private string exerciseTimeStamp;
+
+    private bool isPlaying = false;
+    private List<RecordedPoint> playbackPoints = new List<RecordedPoint>();
+    private float playbackTimer = 0f;
+    private int playbackIndex = 0;
+
+    public bool triggersSetRecordingOn, triggersSetRecordingOff, triggersStartPlayback, triggersStopPlayback;
+    public string tempExerciseName;
+    public float tempExerciseTimeStamp;
+    public bool triggerSetExerciseName;
 
     private void Start()
     {
@@ -45,7 +58,7 @@ public class FeedbackDrawing : MonoBehaviour
     private void Update()
     {
         bool isHoldingTrigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.RTouch) > 0.1f;
-
+        //isHoldingTrigger = isDrawing; // TODO FOR TESTING
         if (isDrawing && isHoldingTrigger)
         {
             Draw();
@@ -55,7 +68,42 @@ public class FeedbackDrawing : MonoBehaviour
             // Stop drawing this line when trigger is released
             currentLine = null;
         }
+
+        if (isPlaying)
+        {
+            //playbackTimer += Time.deltaTime;
+            PlaybackUpdate();
+        }
+
+
+        // testing code
+        if (triggersSetRecordingOn)
+        {
+            triggersSetRecordingOn = false;
+            setRecordingOn();
+        }
+        if (triggersSetRecordingOff)
+        {
+            triggersSetRecordingOff = false;
+            setRecordingOff();
+        }
+        if (triggerSetExerciseName)
+        {
+            triggerSetExerciseName = false;
+            SetExerciseName(tempExerciseName, tempExerciseTimeStamp.ToString());
+        }
+        if (triggersStartPlayback)
+        {
+            triggersStartPlayback = false;
+            startPlayback();
+        }
+        if (triggersStopPlayback)
+        {
+            triggersStopPlayback = false;
+            StopPlayback();
+        }
     }
+
 
     private void Draw()
     {
@@ -74,22 +122,22 @@ public class FeedbackDrawing : MonoBehaviour
         {
             currentLine.positionCount++;
             currentLine.SetPosition(currentLine.positionCount - 1, currentPosition);
-            recordedPoints.Add(new RecordedPoint(currentLineId, currentPosition, Time.time));
+            recordedPoints.Add(new RecordedPoint(currentLineId, currentPosition, feedbackTimestamp));
         }
-    }
 
-    private void SaveRecordingToCSV(string exerciseTimeStamp = "")
+        feedbackTimestamp += Time.deltaTime;
+    }
+    private void SaveRecordingToCSV()
     {
         string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "Feedbacks");
-        if (!Directory.Exists(folderPath))
-            Directory.CreateDirectory(folderPath);
+        if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
 
         string fileName = $"{exerciseName}_{exerciseTimeStamp}_feedback.csv";
         string filePath = Path.Combine(folderPath, fileName);
 
         if (File.Exists(filePath))
         {
-            filePath = Path.Combine(folderPath, $"{exerciseName}_{exerciseTimeStamp}_feedback_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
+            File.Delete(filePath);
         }
 
         try
@@ -111,16 +159,15 @@ public class FeedbackDrawing : MonoBehaviour
 
         recordedPoints.Clear();
     }
-
     public void PlaybackDrawing()
     {
         string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "Feedbacks");
-        string filePath = Path.Combine(folderPath, $"{exerciseName}_feedback.csv");
+        string filePath = Path.Combine(folderPath, $"{exerciseName}_{exerciseTimeStamp}_feedback.csv");
 
         if (File.Exists(filePath))
         {
             string[] lines = File.ReadAllLines(filePath);
-            Dictionary<int, List<Vector3>> linePoints = new Dictionary<int, List<Vector3>>();
+            playbackPoints.Clear();
 
             foreach (string line in lines)
             {
@@ -131,44 +178,119 @@ public class FeedbackDrawing : MonoBehaviour
                     int.TryParse(values[0], out int lineId) &&
                     float.TryParse(values[1], out float x) &&
                     float.TryParse(values[2], out float y) &&
-                    float.TryParse(values[3], out float z))
+                    float.TryParse(values[3], out float z) &&
+                    float.TryParse(values[4], out float time))
                 {
                     Vector3 pos = new Vector3(x, y, z);
-                    if (!linePoints.ContainsKey(lineId))
-                        linePoints[lineId] = new List<Vector3>();
-                    linePoints[lineId].Add(pos);
+                    playbackPoints.Add(new RecordedPoint(lineId, pos, time));
                 }
             }
-
-            // Recreate lines visually
-            foreach (var kvp in linePoints)
-            {
-                GameObject newLineGO = Instantiate(linePrefab.gameObject);
-                LineRenderer lr = newLineGO.GetComponent<LineRenderer>();
-                lr.positionCount = kvp.Value.Count;
-                lr.SetPositions(kvp.Value.ToArray());
-                allLines.Add(lr);
-            }
-
-            Debug.Log("Playback complete: lines redrawn.");
         }
         else
         {
             Debug.LogError("No recording found to playback.");
         }
     }
+    private void PlaybackUpdate()
+    {
+        if (playbackIndex >= playbackPoints.Count)
+        {
+            isPlaying = false;
+            Debug.Log("Playback complete.");
+            return;
+        }
 
+        playbackTimer += Time.deltaTime;
+
+        while (playbackIndex < playbackPoints.Count && playbackPoints[playbackIndex].time <= playbackTimer)
+        {
+            RecordedPoint point = playbackPoints[playbackIndex];
+
+            // Find or create the correct line
+            LineRenderer line = allLines.Find(lr => lr.name == "Line_" + point.lineId);
+            if (line == null)
+            {
+                GameObject newLineGO = Instantiate(linePrefab.gameObject);
+                line = newLineGO.GetComponent<LineRenderer>();
+                line.positionCount = 0;
+                line.name = "Line_" + point.lineId;
+                allLines.Add(line);
+            }
+
+            // Add the point
+            line.positionCount++;
+            line.SetPosition(line.positionCount - 1, point.position);
+
+            playbackIndex++;
+        }
+    }
+
+
+    // public functions for external control
     public void setRecordingOn()
     {
+        if(exerciseName == null || exerciseName == "" || exerciseTimeStamp == null || exerciseTimeStamp == "")
+        {
+            Debug.LogError("Exercise name or timestamp is not set. Please set them before starting recording.");
+            return;
+        }
         isRecording = true;
+        isDrawing = true;
+        feedbackTimestamp = 0f;
         recordedPoints.Clear();
         Debug.Log("Recording started.");
     }
 
-    public void setRecordingOff(string exerciseTimeStamp = "")
+    public void setRecordingOff()
     {
         isRecording = false;
-        SaveRecordingToCSV(exerciseTimeStamp);
+        isDrawing = false;
+        SaveRecordingToCSV();
         Debug.Log("Recording stopped and saved.");
     }
+
+    public void SetExerciseName(string newExerciseName, string newExerciseTimeStamp)
+    {
+        exerciseName = newExerciseName;
+        exerciseTimeStamp = newExerciseTimeStamp;
+
+        Debug.Log($"Exercise name set to: {exerciseName} with timestamp: {exerciseTimeStamp}");
+
+        if (exerciseName.Contains("Doctor") || exerciseName.Contains("Patient")){ }
+        else
+        {
+            Debug.LogWarning("Exercise name does not contain 'Doctor' or 'Patient'. Timestamp may not be set correctly.");
+        }
+    }
+
+    public void startPlayback()
+    {
+        if (!isPlaying)
+        {
+            if (playbackPoints.Count > 0)
+            {
+                isPlaying = true;
+                playbackTimer = 0f;
+                playbackIndex = 0;
+                allLines.Clear();
+                Debug.Log("Playback started.");
+            }
+            else
+            {
+                Debug.LogWarning("No points found in file.");
+            }
+            PlaybackDrawing();
+        }
+        else
+        {
+            Debug.LogWarning("Playback is already in progress.");
+        }
+    }
+    public void StopPlayback()
+    {
+        isPlaying = false;
+        playbackPoints.Clear();
+        Debug.Log("Playback manually stopped.");
+    }
+
 }
