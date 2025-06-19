@@ -175,6 +175,88 @@ public class UIManager : MonoBehaviour
         foreach (var ex in exerciseList.exercises)
             CreateTwinItems(ex);
     }
+public void onDoctorExercisePlay()
+    {
+        Debug.LogWarning("Doctor plays his own exercise");
+    }
+
+    public void onDoctorNewExerciseContinue()
+    {
+        Debug.LogWarning("Doctor continues to add a new exercise");
+    }
+
+    public void onDoctorStartRecording(string exerciseTitle)
+    {
+        Debug.LogWarning($"Doctor starts recording exercise: {exerciseTitle}");
+      
+
+    }
+
+    public void onDoctorStopRecording(string exerciseTitle)
+    {
+        Debug.LogWarning($"Doctor stops recording exercise: {exerciseTitle} and goes to preview panel");
+
+    }
+
+  public void onDoctorPreviewExercise(string exerciseTitle)
+    {
+        Debug.LogWarning($"Doctor previews his own exercise before saving: {exerciseTitle}");
+    
+
+    }
+    public void onDoctorRedoExercise(string exerciseTitle)
+    {
+        Debug.LogWarning("Doctor redoes the exercise recording");
+    }
+
+
+    //Doctor feedback section now
+
+    public void onDoctorGiveFeedback(string exerciseTitle)
+    {
+        Debug.LogWarning("Doctor plays the recording ");
+        //todo more
+    }
+
+
+    //Patient panel
+    //exercise section
+    public void onPatientPerform(string exerciseTitle)
+    {//patient watches the recording of doctor 
+        Debug.LogWarning($"Playback of doctor's performance with controls {exerciseTitle}");
+       
+    }
+    public void onPatientStartRecordingPerform(string exerciseTitle)
+    {
+        Debug.LogWarning($"Patient starts movement for this {exerciseTitle}");
+
+    }
+    public void onPatientStoptRecordingPerform(string exerciseTitle)
+    {
+        Debug.LogWarning($"Patient stops movement for this {exerciseTitle}");
+
+    }
+
+    public void onPatientPreviewExercise(string exerciseTitle)
+    {
+        Debug.LogWarning($"Patient previews/playback his own exercise before sending it to doctor");
+
+
+    }
+    public void onPatientRedoExercise(string exerciseTitle)
+    {
+        Debug.LogWarning("Patient redoes the exercise recording");
+    }
+
+
+    //feedback section
+
+    public void onPatientPlayFeedback(string exerciseTitle)
+    {
+        Debug.LogWarning($"Feedback Playback for  {exerciseTitle} opens");
+    }
+    //todo more
+
 
     // public void RecordVideo() { }
     // public void PauseVideo() { }
