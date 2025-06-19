@@ -42,24 +42,7 @@ public class UIManager : MonoBehaviour
         RenderAllExercises();
     }
 
-    public void OnContinueAddExercise()
-    {
-        string title = titleInput.text.Trim();
-        string description = descriptionInput.text.Trim();
-        if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(description))
-        {
-            Debug.LogWarning("Please input Title and Description！");
-            return;
-        }
 
-        var data = new ExerciseData { title = title, description = description };
-        exerciseList.exercises.Add(data);
-        SaveExercisesToJson();
-
-        CreateTwinItems(data);
-        titleInput.text = "";
-        descriptionInput.text = "";
-    }
 
     private void CreateTwinItems(ExerciseData data)
     {
@@ -75,12 +58,13 @@ public class UIManager : MonoBehaviour
         BindRemove(patientGO, data.title);
         BindPerform(patientGO, data.title);
 
-        var editBtn = FindButton(doctorGO.transform, "Edit button");
+        var editBtn = FindButton(doctorGO.transform, "Play button");
         if (editBtn != null)
             editBtn.onClick.AddListener(() =>
             {
                 currentExerciseTitle = data.title;
-                userSelector.ShowOnly(userSelector.recordDoctorPanel); // playDoctorPanel needed
+                onDoctorExercisePlay(currentExerciseTitle);
+                //userSelector.ShowOnly(userSelector.recordDoctorPanel); // playDoctorPanel needed
             });
     }
 
@@ -174,37 +158,57 @@ public class UIManager : MonoBehaviour
     {
         foreach (var ex in exerciseList.exercises)
             CreateTwinItems(ex);
-    }
-public void onDoctorExercisePlay()
+    } 
+    public void OnContinueAddExercise()
     {
-        Debug.LogWarning("Doctor plays his own exercise");
+        string title = titleInput.text.Trim();
+        string description = descriptionInput.text.Trim();
+        if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(description))
+        {
+            Debug.LogWarning("Please input Title and Description！");
+            return;
+        }
+
+        var data = new ExerciseData { title = title, description = description };
+        exerciseList.exercises.Add(data);
+        SaveExercisesToJson();
+
+        CreateTwinItems(data);
+        titleInput.text = "";
+        descriptionInput.text = "";
+        AppState.CurrentUser = UserType.Doctor;
+        userSelector.ShowOnly(userSelector.recordDoctorPanel); 
+        currentExerciseTitle = title; // Set current exercise title for further actions
+        Debug.LogWarning($"New exercise added: {currentExerciseTitle}");
+    } 
+  
+public void onDoctorExercisePlay(string currentExerciseTitle)
+    {
+        Debug.LogWarning("Doctor plays his own exercise: " + currentExerciseTitle);
     }
 
-    public void onDoctorNewExerciseContinue()
-    {
-        Debug.LogWarning("Doctor continues to add a new exercise");
-    }
 
-    public void onDoctorStartRecording(string exerciseTitle)
+
+    public void onDoctorStartRecording()
     {
-        Debug.LogWarning($"Doctor starts recording exercise: {exerciseTitle}");
+        Debug.LogWarning($"Doctor starts recording exercise: ");
       
 
     }
 
-    public void onDoctorStopRecording(string exerciseTitle)
+    public void onDoctorStopRecording()
     {
-        Debug.LogWarning($"Doctor stops recording exercise: {exerciseTitle} and goes to preview panel");
+        Debug.LogWarning($"Doctor stops recording exercise:  and goes to preview panel");
 
     }
 
-  public void onDoctorPreviewExercise(string exerciseTitle)
+  public void onDoctorPreviewExercise()
     {
-        Debug.LogWarning($"Doctor previews his own exercise before saving: {exerciseTitle}");
+        Debug.LogWarning($"Doctor previews his own exercise before saving: ");
     
 
     }
-    public void onDoctorRedoExercise(string exerciseTitle)
+    public void onDoctorRedoExercise()
     {
         Debug.LogWarning("Doctor redoes the exercise recording");
     }
@@ -212,38 +216,38 @@ public void onDoctorExercisePlay()
 
     //Doctor feedback section now
 
-    public void onDoctorGiveFeedback(string exerciseTitle)
+    public void onDoctorGiveFeedback()
     {
         Debug.LogWarning("Doctor plays the recording ");
         //todo more
     }
 
-
+   
     //Patient panel
     //exercise section
-    public void onPatientPerform(string exerciseTitle)
+    public void onPatientPerform()
     {//patient watches the recording of doctor 
-        Debug.LogWarning($"Playback of doctor's performance with controls {exerciseTitle}");
+        Debug.LogWarning($"Playback of doctor's performance with controls ");
        
     }
-    public void onPatientStartRecordingPerform(string exerciseTitle)
+    public void onPatientStartRecordingPerform()
     {
-        Debug.LogWarning($"Patient starts movement for this {exerciseTitle}");
+        Debug.LogWarning($"Patient starts movement for this ");
 
     }
-    public void onPatientStoptRecordingPerform(string exerciseTitle)
+    public void onPatientStoptRecordingPerform()
     {
-        Debug.LogWarning($"Patient stops movement for this {exerciseTitle}");
+        Debug.LogWarning($"Patient stops movement for this ");
 
     }
 
-    public void onPatientPreviewExercise(string exerciseTitle)
+    public void onPatientPreviewExercise()
     {
         Debug.LogWarning($"Patient previews/playback his own exercise before sending it to doctor");
 
 
     }
-    public void onPatientRedoExercise(string exerciseTitle)
+    public void onPatientRedoExercise()
     {
         Debug.LogWarning("Patient redoes the exercise recording");
     }
@@ -251,9 +255,9 @@ public void onDoctorExercisePlay()
 
     //feedback section
 
-    public void onPatientPlayFeedback(string exerciseTitle)
+    public void onPatientPlayFeedback()
     {
-        Debug.LogWarning($"Feedback Playback for  {exerciseTitle} opens");
+        Debug.LogWarning($"Feedback Playback for   opens");
     }
     //todo more
 
