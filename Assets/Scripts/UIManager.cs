@@ -147,7 +147,6 @@ public class UIManager : MonoBehaviour
         }
     };
 
-
     private void LoadExercisesFromJson()
     {
         if (File.Exists(jsonPath))

@@ -10,13 +10,33 @@ public class JointTracker : MonoBehaviour
     public Transform head;
     public Transform leftHand;
     public Transform rightHand;
+    public Transform entityGO;
 
     public string csvFilePath;
     public string exerciseName = "JointPositions";
 
+    public bool startRecording = true; // Automatically start recording on Start
+
+    private Coroutine loggingCoroutine;
+    private float timeStamp = 0f;
+
     void Start()
     {
-        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "Recordings");
+        //InitializeCsvFile();
+        StartCoroutine(AssignJointsAfterDelay());
+        if (startRecording)
+        {
+            StartRecording();
+        }
+    }
+    private void FixedUpdate()
+    {
+        timeStamp += Time.fixedDeltaTime;
+    }
+
+    private void InitializeCsvFile()
+    {
+        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "MovementRecordings");
 
         // Ensure the directory exists
         if (!Directory.Exists(folderPath))
@@ -26,32 +46,24 @@ public class JointTracker : MonoBehaviour
 
         csvFilePath = Path.Combine(folderPath, exerciseName + ".csv");
         WriteCsvHeader();
-        StartCoroutine(AssignJointsAfterDelay());
-        StartCoroutine(LogJointsPeriodically());
-    }
-
-
-    void Update()
-    {
     }
 
     private IEnumerator AssignJointsAfterDelay()
     {
         yield return new WaitForSeconds(5f);
 
-        if (head == null) head = transform.Find("Joint Head");
-        if (leftHand == null) leftHand = transform.Find("Joint LeftHandWrist");
-        if (rightHand == null) rightHand = transform.Find("Joint RightHandWrist");
-
+        if (head == null) head = entityGO.Find("Joint Head");
+        if (leftHand == null) leftHand = entityGO.Find("Joint LeftHandWrist");
+        if (rightHand == null) rightHand = entityGO.Find("Joint RightHandWrist");
     }
-
 
     private void WriteCsvHeader()
     {
-        //if file exists delete it
+        // If file exists, delete it
         if (File.Exists(csvFilePath))
         {
             File.Delete(csvFilePath);
+            Debug.LogWarning("Existing CSV file deleted: " + csvFilePath);
         }
         if (!File.Exists(csvFilePath))
         {
@@ -79,7 +91,7 @@ public class JointTracker : MonoBehaviour
                 "{1},{2},{3},{4},{5},{6}," +
                 "{7},{8},{9},{10},{11},{12}," +
                 "{13},{14},{15},{16},{17},{18}",
-                Time.time,
+                timeStamp,
                 head.position.x, head.position.y, head.position.z, headRot.x, headRot.y, headRot.z,
                 leftHand.position.x, leftHand.position.y, leftHand.position.z, leftHandRot.x, leftHandRot.y, leftHandRot.z,
                 rightHand.position.x, rightHand.position.y, rightHand.position.z, rightHandRot.x, rightHandRot.y, rightHandRot.z
@@ -90,17 +102,42 @@ public class JointTracker : MonoBehaviour
         }
     }
 
-    public List<string[]> ReadCsv()
+    // Public function to start recording
+    public void StartRecording()
     {
-        var lines = new List<string[]>();
-        if (File.Exists(csvFilePath))
+        timeStamp = 0f; 
+        InitializeCsvFile();
+        if (loggingCoroutine == null)
         {
-            var allLines = File.ReadAllLines(csvFilePath);
-            foreach (var line in allLines)
-            {
-                lines.Add(line.Split(','));
-            }
+            loggingCoroutine = StartCoroutine(LogJointsPeriodically());
+        } else
+        {
+            Debug.LogWarning("Recording is already in progress. Please stop the current recording before starting a new one.");
         }
-        return lines;
+    }
+
+    // Public function to stop recording
+    public void StopRecording()
+    {
+        if (loggingCoroutine != null)
+        {
+            StopCoroutine(loggingCoroutine);
+            loggingCoroutine = null;
+        } else
+        {
+            Debug.LogWarning("No recording is in progress to stop.");
+        }
+    }
+
+    // Public function to change the exercise name and reset the CSV file
+    public void NewExercise(string newExerciseName, bool patient = false)
+    {
+        if(loggingCoroutine != null)
+        {
+            StopRecording(); // Stop current recording if it's in progress
+        }
+        exerciseName = newExerciseName;
+        exerciseName = (patient ? "Patient_" : "Doctor_") + exerciseName;
+        //InitializeCsvFile();
     }
 }

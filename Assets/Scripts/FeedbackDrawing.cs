@@ -5,21 +5,36 @@ using System;
 
 public class FeedbackDrawing : MonoBehaviour
 {
-    public bool isDrawing = false; // Toggle to enable/disable drawing
-    public bool isRecording = false; // Toggle to enable/disable recording
-    public LineRenderer linePrefab; // Assign a LineRenderer prefab in the Inspector
+    [System.Serializable]
+    public struct RecordedPoint
+    {
+        public int lineId;
+        public Vector3 position;
+        public float time;
+
+        public RecordedPoint(int lineId, Vector3 position, float time)
+        {
+            this.lineId = lineId;
+            this.position = position;
+            this.time = time;
+        }
+    }
+
+    public bool isDrawing = false;
+    public bool isRecording = false;
+    public LineRenderer linePrefab;
     private LineRenderer currentLine;
-    private List<LineRenderer> allLines = new List<LineRenderer>(); // Store all LineRenderers
-    private List<(int lineId, Vector3 position, float time)> recordedPoints = new List<(int, Vector3, float)>(); // Stores lineId, points, and timestamps
+    private List<LineRenderer> allLines = new List<LineRenderer>();
+    private List<RecordedPoint> recordedPoints = new List<RecordedPoint>();
     public string exerciseName = "DrawingExercise";
-    private int currentLineId = 0; // Unique identifier for each LineRenderer
+    private int currentLineId = 0;
 
     private void Start()
     {
-        // If no line prefab, create one
         if (linePrefab == null)
         {
-            linePrefab = new GameObject("LineRenderer").AddComponent<LineRenderer>();
+            GameObject lineGO = new GameObject("LineRenderer");
+            linePrefab = lineGO.AddComponent<LineRenderer>();
             linePrefab.material = new Material(Shader.Find("Sprites/Default"));
             linePrefab.startWidth = 0.1f;
             linePrefab.endWidth = 0.1f;
@@ -30,23 +45,15 @@ public class FeedbackDrawing : MonoBehaviour
     private void Update()
     {
         bool isHoldingTrigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.RTouch) > 0.1f;
-        // TODO REMOVE THIS
-        isHoldingTrigger = true; // For testing purposes, always hold the trigger
 
         if (isDrawing && isHoldingTrigger)
         {
             Draw();
         }
-        else if (currentLine != null && !isDrawing) //TODO CHANGE THIS TO !isHoldingTrigger
+        else if (currentLine != null && !isHoldingTrigger)
         {
-            // Stop drawing the current line
+            // Stop drawing this line when trigger is released
             currentLine = null;
-        }
-
-        if (!isDrawing && isRecording && recordedPoints.Count > 0)
-        {
-            // Save recording when drawing stops
-            SaveRecordingToCSV();
         }
     }
 
@@ -54,70 +61,96 @@ public class FeedbackDrawing : MonoBehaviour
     {
         if (currentLine == null)
         {
-            // Create a new line when starting to draw
-            currentLine = Instantiate(linePrefab, transform.position, Quaternion.identity);
+            // Instantiate from prefab GameObject properly
+            GameObject newLineGO = Instantiate(linePrefab.gameObject, transform.position, Quaternion.identity);
+            currentLine = newLineGO.GetComponent<LineRenderer>();
             currentLine.positionCount = 0;
-            allLines.Add(currentLine); // Add to the list of lines
-            currentLineId++; // Increment the line ID
+            allLines.Add(currentLine);
+            currentLineId++;
         }
 
-        // Add the current position to the line and record it
         Vector3 currentPosition = transform.position;
         if (currentLine.positionCount == 0 || currentLine.GetPosition(currentLine.positionCount - 1) != currentPosition)
         {
             currentLine.positionCount++;
             currentLine.SetPosition(currentLine.positionCount - 1, currentPosition);
-            recordedPoints.Add((currentLineId, currentPosition, Time.time)); // Record lineId, position, and timestamp
+            recordedPoints.Add(new RecordedPoint(currentLineId, currentPosition, Time.time));
         }
     }
 
-    private void SaveRecordingToCSV()
+    private void SaveRecordingToCSV(string exerciseTimeStamp = "")
     {
         string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "Feedbacks");
         if (!Directory.Exists(folderPath))
-        {
             Directory.CreateDirectory(folderPath);
-        }
 
-        string filePath = Path.Combine(folderPath, exerciseName + "_feedback.csv");
-        // Delete file if it exists
+        string fileName = $"{exerciseName}_{exerciseTimeStamp}_feedback.csv";
+        string filePath = Path.Combine(folderPath, fileName);
+
         if (File.Exists(filePath))
         {
-            //File.Delete(filePath);
-            filePath = Path.Combine(folderPath, exerciseName + "_feedback_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv"); // Create a new file with timestamp
+            filePath = Path.Combine(folderPath, $"{exerciseName}_{exerciseTimeStamp}_feedback_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
         }
 
-        using (StreamWriter writer = new StreamWriter(filePath))
+        try
         {
-            writer.WriteLine("LineId,X,Y,Z,Time"); // Add header
-            foreach (var point in recordedPoints)
+            using (StreamWriter writer = new StreamWriter(filePath))
             {
-                writer.WriteLine($"{point.lineId},{point.position.x},{point.position.y},{point.position.z},{point.time}");
+                writer.WriteLine("LineId,X,Y,Z,Time");
+                foreach (var point in recordedPoints)
+                {
+                    writer.WriteLine($"{point.lineId},{point.position.x},{point.position.y},{point.position.z},{point.time}");
+                }
             }
+            Debug.Log($"Drawing saved to {filePath}");
         }
-        Debug.Log($"Drawing saved to {filePath}");
-        recordedPoints.Clear(); // Clear the points after saving
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to save CSV: {e.Message}");
+        }
+
+        recordedPoints.Clear();
     }
 
     public void PlaybackDrawing()
     {
-        string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "Feedbacks", exerciseName + "_feedback.csv");
+        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "Feedbacks");
+        string filePath = Path.Combine(folderPath, $"{exerciseName}_feedback.csv");
+
         if (File.Exists(filePath))
         {
             string[] lines = File.ReadAllLines(filePath);
+            Dictionary<int, List<Vector3>> linePoints = new Dictionary<int, List<Vector3>>();
+
             foreach (string line in lines)
             {
+                if (line.StartsWith("LineId")) continue; // Skip header
+
                 string[] values = line.Split(',');
                 if (values.Length == 5 &&
                     int.TryParse(values[0], out int lineId) &&
                     float.TryParse(values[1], out float x) &&
                     float.TryParse(values[2], out float y) &&
-                    float.TryParse(values[3], out float z) &&
-                    float.TryParse(values[4], out float time))
+                    float.TryParse(values[3], out float z))
                 {
-                    Debug.Log($"Playback Line {lineId}: Point {new Vector3(x, y, z)} at Time: {time}");
+                    Vector3 pos = new Vector3(x, y, z);
+                    if (!linePoints.ContainsKey(lineId))
+                        linePoints[lineId] = new List<Vector3>();
+                    linePoints[lineId].Add(pos);
                 }
             }
+
+            // Recreate lines visually
+            foreach (var kvp in linePoints)
+            {
+                GameObject newLineGO = Instantiate(linePrefab.gameObject);
+                LineRenderer lr = newLineGO.GetComponent<LineRenderer>();
+                lr.positionCount = kvp.Value.Count;
+                lr.SetPositions(kvp.Value.ToArray());
+                allLines.Add(lr);
+            }
+
+            Debug.Log("Playback complete: lines redrawn.");
         }
         else
         {
@@ -128,14 +161,14 @@ public class FeedbackDrawing : MonoBehaviour
     public void setRecordingOn()
     {
         isRecording = true;
-        recordedPoints.Clear(); // Clear previous points
+        recordedPoints.Clear();
         Debug.Log("Recording started.");
     }
 
-    public void setRecordingOff()
+    public void setRecordingOff(string exerciseTimeStamp = "")
     {
         isRecording = false;
-        recordedPoints.Clear();
-        Debug.Log("Recording stopped.");
+        SaveRecordingToCSV(exerciseTimeStamp);
+        Debug.Log("Recording stopped and saved.");
     }
 }
