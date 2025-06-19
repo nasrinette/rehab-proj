@@ -25,6 +25,7 @@ public class UIManager : MonoBehaviour
     public GameObject patientExercisePrefab;
     public Transform contentParentDoctor;
     public Transform contentParentPatient;
+    public Transform contentFeedback;
     public TMP_InputField titleInput;
     public TMP_InputField descriptionInput;
 
@@ -43,6 +44,24 @@ public class UIManager : MonoBehaviour
     }
 
 
+    public void OnContinueAddExercise()
+    {
+        string title = titleInput.text.Trim();
+        string description = descriptionInput.text.Trim();
+        if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(description))
+        {
+            Debug.Log("Please input Title and Description！");
+            return;
+        }
+
+        var data = new ExerciseData { title = title, description = description };
+        exerciseList.exercises.Add(data);
+        SaveExercisesToJson();
+
+        CreateTwinItems(data);
+        titleInput.text = "";
+        descriptionInput.text = "";
+    }
 
     private void CreateTwinItems(ExerciseData data)
     {
@@ -183,8 +202,18 @@ public class UIManager : MonoBehaviour
     } 
   
 public void onDoctorExercisePlay(string currentExerciseTitle)
+    }
+
+    // public ui funcgitons
+public void onDoctorExercisePlay()
+    {
+        Debug.Log("Doctor plays his own exercise");
+    }
+
+    public void onDoctorNewExerciseContinue()
     {
         Debug.LogWarning("Doctor plays his own exercise: " + currentExerciseTitle);
+        Debug.Log("Doctor continues to add a new exercise");
     }
 
 
@@ -194,23 +223,26 @@ public void onDoctorExercisePlay(string currentExerciseTitle)
         Debug.LogWarning($"Doctor starts recording exercise: ");
       
 
+        Debug.Log($"Doctor starts recording exercise: {exerciseTitle}");
     }
 
     public void onDoctorStopRecording()
     {
         Debug.LogWarning($"Doctor stops recording exercise:  and goes to preview panel");
+        Debug.Log($"Doctor stops recording exercise: {exerciseTitle} and goes to preview panel");
 
     }
 
   public void onDoctorPreviewExercise()
     {
         Debug.LogWarning($"Doctor previews his own exercise before saving: ");
+        Debug.Log($"Doctor previews his own exercise before saving: {exerciseTitle}");
     
 
     }
     public void onDoctorRedoExercise()
     {
-        Debug.LogWarning("Doctor redoes the exercise recording");
+        Debug.Log("Doctor redoes the exercise recording");
     }
 
 
@@ -218,7 +250,7 @@ public void onDoctorExercisePlay(string currentExerciseTitle)
 
     public void onDoctorGiveFeedback()
     {
-        Debug.LogWarning("Doctor plays the recording ");
+        Debug.Log("Doctor plays the recording ");
         //todo more
     }
 
@@ -228,36 +260,41 @@ public void onDoctorExercisePlay(string currentExerciseTitle)
     public void onPatientPerform()
     {//patient watches the recording of doctor 
         Debug.LogWarning($"Playback of doctor's performance with controls ");
+        Debug.Log($"Playback of doctor's performance with controls {exerciseTitle}");
        
     }
     public void onPatientStartRecordingPerform()
     {
         Debug.LogWarning($"Patient starts movement for this ");
+        Debug.Log($"Patient starts movement for this {exerciseTitle}");
 
     }
     public void onPatientStoptRecordingPerform()
     {
         Debug.LogWarning($"Patient stops movement for this ");
+        Debug.Log($"Patient stops movement for this {exerciseTitle}");
 
     }
 
     public void onPatientPreviewExercise()
     {
-        Debug.LogWarning($"Patient previews/playback his own exercise before sending it to doctor");
+        Debug.Log($"Patient previews/playback his own exercise before sending it to doctor");
 
 
     }
     public void onPatientRedoExercise()
     {
-        Debug.LogWarning("Patient redoes the exercise recording");
+        Debug.Log("Patient redoes the exercise recording");
     }
 
 
     //feedback section
 
+    public void onPatientPlayFeedback(string exerciseTitle, string timestamp)
     public void onPatientPlayFeedback()
     {
         Debug.LogWarning($"Feedback Playback for   opens");
+        Debug.Log($"Feedback Playback for  {exerciseTitle} open on timestamp {timestamp}");
     }
     //todo more
 

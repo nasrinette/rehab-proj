@@ -58,7 +58,7 @@ public class FeedbackDrawing : MonoBehaviour
     private void Update()
     {
         bool isHoldingTrigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.RTouch) > 0.1f;
-        //isHoldingTrigger = isDrawing; // TODO FOR TESTING
+        isHoldingTrigger = isDrawing; // TODO FOR TESTING
         if (isDrawing && isHoldingTrigger)
         {
             Draw();
@@ -235,6 +235,7 @@ public class FeedbackDrawing : MonoBehaviour
             return;
         }
         isRecording = true;
+        isDrawing = true;
         feedbackTimestamp = 0f;
         recordedPoints.Clear();
         Debug.Log("Recording started.");
@@ -243,6 +244,7 @@ public class FeedbackDrawing : MonoBehaviour
     public void setRecordingOff()
     {
         isRecording = false;
+        isDrawing = false;
         SaveRecordingToCSV();
         Debug.Log("Recording stopped and saved.");
     }

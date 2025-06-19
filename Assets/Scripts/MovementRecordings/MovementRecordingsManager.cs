@@ -3,16 +3,31 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using System;
+using TMPro;
+using UnityEngine.XR;
 
 
 public class FeedbackList
 {
-    public List<string> timestamps;
+    public List<string> timestamps = new();
+    public float recordingTime = 0f;
 }
 
 public class MovementRecordingsManager : MonoBehaviour
 {
-    
+    public GameObject feedbackButtonPrefab;
+    public GameObject feedbackIndicatorPrefab;
+    public Transform handleSlideArea;
+    public UIManager UImanager;
+    private void Start()
+    {
+        //List<string> tempTimeStamps = MakeFeedbackListFromFiles("Patient_de").timestamps;
+        //foreach (string timestamp in tempTimeStamps)
+        //{
+        //    Debug.Log("Timestamp: " + timestamp);
+        //}
+        //generateFeedBackUI(UImanager.contentFeedback, "Patient_dr");
+    }
     public FeedbackList MakeFeedbackListFromFiles(string exerciseName) // exercisename should be like "Patient_DrawingExercise" or "Doctor_DrawingExercise"
     {
         string timestampFromFile;
@@ -33,6 +48,7 @@ public class MovementRecordingsManager : MonoBehaviour
             
             // if filename starts with patient_ or doctor_ then get the timestamp which is the part after 2nd _ otherwise it is after the first 
             timestampFromFile = fileName.Contains("octor") || fileName.Contains("atient") ? fileName.Split('_')[2] : fileName.Split('_')[1];
+            Debug.Log("Timestamp from file: " + timestampFromFile);
             feedbacksList.timestamps.Add(timestampFromFile);
         }
         return feedbacksList;
@@ -57,5 +73,38 @@ public class MovementRecordingsManager : MonoBehaviour
             exerciseList.exercises.Add(data);
         }
         return exerciseList;
+    }
+
+    public void generateFeedBackUI(Transform content, string exerciseName)
+    {
+        // create a new tmbutton for each timestamp in the feedback list
+        FeedbackList feedbackList = MakeFeedbackListFromFiles(exerciseName);
+        if (feedbackList == null || feedbackList.timestamps.Count == 0)
+        {
+            Debug.LogWarning("No feedbacks found for the specified exercise.");
+            return;
+        }
+        foreach (string timestamp in feedbackList.timestamps)
+        {
+            GameObject newButton = Instantiate(feedbackButtonPrefab, content);
+            newButton.name = "FeedbackButton_" + timestamp;
+            newButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = timestamp;
+            newButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => UImanager.onPatientPlayFeedback(exerciseName, timestamp));
+
+            GameObject feedbackIndicator = Instantiate(feedbackIndicatorPrefab, handleSlideArea);
+            feedbackIndicator.GetComponent<RectTransform>().anchoredPosition = new Vector2(float.Parse(timestamp) * handleSlideArea.transform.parent.GetComponent<RectTransform>().rect.width / getFeedbackRecordingMaxTime(exerciseName), 0);
+        }
+    }
+
+    public float getFeedbackRecordingMaxTime(string exerciseName)
+    {
+        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "MovementRecordings");
+        string files = Directory.GetFiles(folderPath, exerciseName + "*.csv")[0];
+        string[] lines = File.ReadAllLines(files);
+        string lastLine = lines[lines.Length - 1];
+        string[] values = lastLine.Split(',');
+        Debug.Log("Max time from file: " + values[0]);
+        // Assuming the max time is the last timestamp in the list
+        return float.Parse(values[0]);
     }
 }
