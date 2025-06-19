@@ -17,6 +17,7 @@ public class UserSelector : MonoBehaviour
     public GameObject doctorPanel;
     public GameObject patientPanel;
     public GameObject newExercisePanel;
+    public GameObject PlayExerciseDoctorPanel;
     public GameObject exercisesDoctorPanel;
     public GameObject recordDoctorPanel;
     public GameObject stopDoctorPanel;
@@ -113,10 +114,10 @@ public class UserSelector : MonoBehaviour
         ShowOnly(feedbackDoctorPanel);
     }
 
-    public void OnDoctorEdit()
+    public void OnDoctorEdit() // play button on exercise list
     {
         AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(recordDoctorPanel); //change to playDoctorPanel
+        ShowOnly(PlayExerciseDoctorPanel);
     }
 
     public void OnNewExercises()
