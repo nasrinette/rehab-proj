@@ -13,22 +13,24 @@ public class UserSelector : MonoBehaviour
     // [SerializeField] private GameObject mainAvatarGO;    // drag MainAvatar here
     // [SerializeField] private GameObject mirrorAvatarGO;  // drag MirrorAvatar here
 
-    public GameObject menuPanel;
-    public GameObject doctorPanel;
-    public GameObject patientPanel;
-    public GameObject newExercisePanel;
-    public GameObject PlayExerciseDoctorPanel;
-    public GameObject exercisesDoctorPanel;
-    public GameObject recordDoctorPanel;
-    public GameObject stopDoctorPanel;
-    public GameObject previewDoctorPanel;
-    public GameObject feedbackDoctorPanel;
-    public GameObject exercisesPatientPanel;
-    public GameObject feedbackPatientPanel;
-    public GameObject recordPatientPanel;
-    public GameObject stopPatientPanel;
-    public GameObject previewPatientPanel;
-    public GameObject playFeedBackPatientPanel;
+    [SerializeField] private List<GameObject> allPanels;
+    [SerializeField] private GameObject menuPanel;
+    [SerializeField] private GameObject doctorPanel;
+    [SerializeField] private GameObject patientPanel;
+    [SerializeField] private GameObject newExercisePanel;
+    [SerializeField] private GameObject playExerciseDoctorPanel;
+    [SerializeField] private GameObject exercisesDoctorPanel;
+    [SerializeField] public GameObject recordDoctorPanel;
+    [SerializeField] private GameObject stopDoctorPanel;
+    [SerializeField] private GameObject previewDoctorPanel;
+    [SerializeField] private GameObject feedbackDoctorPanel;
+    [SerializeField] private GameObject drawForFeedbackDoctorPanel;
+    [SerializeField] private GameObject exercisesPatientPanel;
+    [SerializeField] private GameObject feedbackPatientPanel;
+    [SerializeField] public GameObject recordPatientPanel;
+    [SerializeField] private GameObject stopPatientPanel;
+    [SerializeField] private GameObject previewPatientPanel;
+    [SerializeField] private GameObject playFeedBackPatientPanel;
 
     private readonly Stack<GameObject> panelHistory = new Stack<GameObject>();
     private GameObject currentPanel;
@@ -81,12 +83,9 @@ public class UserSelector : MonoBehaviour
         AppState.CurrentUser = UserType.Patient;
         // mainAvatarGO.SetActive(true);
         // mirrorAvatarGO.SetActive(true);
-
         SwapPresetOnBoth(patientPreset);
         ShowOnly(patientPanel);
     }
-
-
 
     public void OnBackToMenu()
     {
@@ -95,125 +94,37 @@ public class UserSelector : MonoBehaviour
         // mirrorAvatarGO.SetActive(false);
         ShowOnly(menuPanel);
     }
-
-    public void OnBackToDoctor()
-    {
-        AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(doctorPanel);
-    }
-
-    public void OnDoctorExercises()
-    {
-        AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(exercisesDoctorPanel);
-    }
-
-    public void OnDoctorFeedback()
-    {
-        AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(feedbackDoctorPanel);
-    }
-
-    public void OnDoctorEdit() // play button on exercise list
-    {
-        AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(PlayExerciseDoctorPanel);
-    }
-
-    public void OnNewExercises()
-    {
-        AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(newExercisePanel);
-    }
-
-    public void OnDoctorContinue()
-    {
-        AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(recordDoctorPanel);
-    }
-
-    public void OnDoctorRecord()
-    {
-        AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(stopDoctorPanel);
-    }
-
-    public void OnDoctorStop()
-    {
-        AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(previewDoctorPanel);
-    }
-
-    public void OnDoctorDone()
-    {
-        AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(exercisesDoctorPanel);
-    }
-
-    public void OnDoctorRedo()
-    {
-        AppState.CurrentUser = UserType.Doctor;
-        ShowOnly(recordDoctorPanel);
-    }
-
-    public void OnPatientFeedback()
-    {
-        AppState.CurrentUser = UserType.Patient;
-        ShowOnly(feedbackPatientPanel);
-    }
-
-    public void OnPatientExercises()
-    {
-        AppState.CurrentUser = UserType.Patient;
-        ShowOnly(exercisesPatientPanel);
-    }
-
-    public void OnPatientPerform()
-    {
-        AppState.CurrentUser = UserType.Patient;
-        ShowOnly(recordPatientPanel);
-    }
-
-    public void OnPatientRecord()
-    {
-        AppState.CurrentUser = UserType.Patient;
-        ShowOnly(stopPatientPanel);
-    }
-
-    public void OnPatientStop()
-    {
-        AppState.CurrentUser = UserType.Patient;
-        ShowOnly(previewPatientPanel);
-    }
-
-    public void OnPatientPlay()
-    {
-        AppState.CurrentUser = UserType.Patient;
-        ShowOnly(playFeedBackPatientPanel);
-    }
+    
+    public void OnBackToDoctor() => ShowOnly(doctorPanel);
+    public void OnDoctorExercises() => ShowOnly(exercisesDoctorPanel);
+    public void OnDoctorFeedback() => ShowOnly(feedbackDoctorPanel);
+    public void OnDoctorPlay() => ShowOnly(playExerciseDoctorPanel);
+    public void OnNewExercises() => ShowOnly(newExercisePanel);
+    public void OnDoctorContinue() => ShowOnly(recordDoctorPanel);
+    public void OnDoctorRecord() => ShowOnly(stopDoctorPanel);
+    public void OnDoctorStop() => ShowOnly(previewDoctorPanel);
+    public void OnDoctorDone() => ShowOnly(exercisesDoctorPanel);
+    public void OnDoctorRedo() => ShowOnly(recordDoctorPanel);
+    public void OnDoctorGiveFeedback() => ShowOnly(drawForFeedbackDoctorPanel);
+    public void OnPatientFeedback() => ShowOnly(feedbackPatientPanel);
+    public void OnPatientExercises() => ShowOnly(exercisesPatientPanel);
+    public void OnPatientPerform() => ShowOnly(recordPatientPanel);
+    public void OnPatientRecord() => ShowOnly(stopPatientPanel);
+    public void OnPatientStop() => ShowOnly(previewPatientPanel);
+    public void OnPatientPlay() => ShowOnly(playFeedBackPatientPanel);
 
 public void ShowOnly(GameObject target, bool remember = true)
     {
         Debug.Log("show only" + target);
-        if (target == null) { Debug.Log("null"); return; };
+        if (target == null) { Debug.Log("null"); return; }
         if (remember && currentPanel != null)
             panelHistory.Push(currentPanel);
 
-        menuPanel.SetActive(false);
-        doctorPanel.SetActive(false);
-        patientPanel.SetActive(false);
-        newExercisePanel.SetActive(false);
-        exercisesDoctorPanel.SetActive(false);
-        recordDoctorPanel.SetActive(false);
-        stopDoctorPanel.SetActive(false);
-        previewDoctorPanel.SetActive(false);
-        feedbackDoctorPanel.SetActive(false);
-        exercisesPatientPanel.SetActive(false);
-        feedbackPatientPanel.SetActive(false);
-        recordPatientPanel.SetActive(false);
-        stopPatientPanel.SetActive(false);
-        previewPatientPanel.SetActive(false);
-        playFeedBackPatientPanel.SetActive(false);
+        foreach (GameObject panel in allPanels)
+        {
+            if (panel != null)
+                panel.SetActive(false);
+        }
 
         Debug.Log("setting" + target);
         target.SetActive(true);

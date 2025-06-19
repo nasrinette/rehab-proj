@@ -83,7 +83,7 @@ public class MovementRecordingsManager : MonoBehaviour
             GameObject newButton = Instantiate(feedbackButtonPrefab, content);
             newButton.name = "FeedbackButton_" + timestamp;
             newButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = timestamp;
-            newButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => OnFeedbackButtonClicked(timestamp));
+            //newButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => OnFeedbackButtonClicked(timestamp));
         }
     }
 }
