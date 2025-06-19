@@ -29,7 +29,7 @@ public class RecordAudio : MonoBehaviour
 
         recordedClip = Microphone.Start(device, false, lengthSec, sampleRate);
         startTime = Time.realtimeSinceStartup;
-        Debug.LogWarning("recording started on device: " + device);
+        Debug.Log("recording started on device: " + device);
     }
     public void PlayRecording()
     {
@@ -49,17 +49,16 @@ public class RecordAudio : MonoBehaviour
 
     public void StopRecording()
     {
-         Debug.LogWarning("Recording stopping");
         Microphone.End(null);
         recordingLength = Time.realtimeSinceStartup - startTime;
         recordedClip = TrimClip(recordedClip, recordingLength);
         SaveRecording();
-        Debug.LogWarning("Recording stopped");
+        Debug.Log("Recording stopped");
     }
 
     public void SaveRecording()
     {
-         Debug.LogWarning("Recording saving");
+        Debug.Log("Recording saving");
 
         if (recordedClip != null)
         {
@@ -67,7 +66,7 @@ public class RecordAudio : MonoBehaviour
             {
                 string fullPath = Path.Combine(Application.persistentDataPath, "recording.wav");
                 WavUtility.Save(fullPath, recordedClip);
-                 Debug.LogWarning("Recording saved as " + filePath);
+                Debug.Log("Recording saved as " + filePath);
             }
             catch (System.Exception ex)
             {
@@ -84,15 +83,16 @@ public class RecordAudio : MonoBehaviour
 
 
     private AudioClip TrimClip(AudioClip clip, float length)
-    { Debug.LogError("trim starting");
+    { 
+        Debug.Log("trim starting");
         int samples = (int)(clip.frequency * length);
         float[] data = new float[samples];
         clip.GetData(data, 0);
 
         AudioClip trimmedClip = AudioClip.Create(clip.name, samples,
-            clip.channels, clip.frequency, false);
+        clip.channels, clip.frequency, false);
         trimmedClip.SetData(data, 0);
-Debug.LogError("trim stopped");
+        Debug.Log("trim stopped");
         return trimmedClip;
     }
 
