@@ -24,7 +24,7 @@ public class UserSelector : MonoBehaviour
     [SerializeField] private GameObject stopDoctorPanel;
     [SerializeField] private GameObject previewDoctorPanel;
     [SerializeField] private GameObject feedbackDoctorPanel;
-    [SerializeField] private GameObject drawForFeedbackDoctorPanel;
+    [SerializeField] public GameObject drawForFeedbackDoctorPanel;
     [SerializeField] private GameObject exercisesPatientPanel;
     [SerializeField] private GameObject feedbackPatientPanel;
     [SerializeField] public GameObject recordPatientPanel;

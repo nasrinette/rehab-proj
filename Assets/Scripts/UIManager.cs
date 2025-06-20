@@ -76,10 +76,10 @@ public class UIManager : MonoBehaviour
         BindRemove(doctorGO, data.title);
         BindRemove(patientGO, data.title);
         BindPerform(patientGO, data.title);
-
-        var editBtn = FindButton(doctorGO.transform, "Play button");
-        if (editBtn != null)
-            editBtn.onClick.AddListener(() =>
+       
+        var playBtn = FindButton(doctorGO.transform, "Play button");
+        if (playBtn != null)
+            playBtn.onClick.AddListener(() =>
             {
                 currentExerciseTitle = data.title;
                 userSelector.ShowOnly(userSelector.playExerciseDoctorPanel); // playDoctorPanel needed
@@ -122,6 +122,9 @@ public class UIManager : MonoBehaviour
                 userSelector.ShowOnly(userSelector.recordPatientPanel);
             });
     }
+
+
+
 
     private Button FindButton(Transform root, string btnName)
     {
