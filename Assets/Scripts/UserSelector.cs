@@ -6,8 +6,8 @@ using static Oculus.Avatar2.OvrAvatarEntity;
 public class UserSelector : MonoBehaviour
 {
     [Header("Avatar presets")]
-    [SerializeField] private SampleAvatarEntity mainAvatar;    // drag �MainAvatar� here
-    [SerializeField] private SampleAvatarEntity mirrorAvatar;  // drag �MirrorAvatar� here
+    [SerializeField] private SampleAvatarEntity mainAvatar;
+    [SerializeField] private SampleAvatarEntity mirrorAvatar;
     [SerializeField] private int doctorPreset = 0;             // Style-1 presets 0-6
     [SerializeField] private int patientPreset = 2;             // pick any other index
     // [SerializeField] private GameObject mainAvatarGO;    // drag MainAvatar here
@@ -18,7 +18,7 @@ public class UserSelector : MonoBehaviour
     [SerializeField] private GameObject doctorPanel;
     [SerializeField] private GameObject patientPanel;
     [SerializeField] private GameObject newExercisePanel;
-    [SerializeField] private GameObject playExerciseDoctorPanel;
+    [SerializeField] public GameObject playExerciseDoctorPanel;
     [SerializeField] private GameObject exercisesDoctorPanel;
     [SerializeField] public GameObject recordDoctorPanel;
     [SerializeField] private GameObject stopDoctorPanel;
@@ -40,7 +40,7 @@ public class UserSelector : MonoBehaviour
         AppState.CurrentUser = UserType.None;
         // mainAvatarGO.SetActive(false);
         // mirrorAvatarGO.SetActive(false);
-        ShowOnly(menuPanel, remember:false);
+        ShowOnly(menuPanel, remember: false);
     }
 
     public void OnBack() => GoBack();
@@ -94,7 +94,7 @@ public class UserSelector : MonoBehaviour
         // mirrorAvatarGO.SetActive(false);
         ShowOnly(menuPanel);
     }
-    
+
     public void OnBackToDoctor() => ShowOnly(doctorPanel);
     public void OnDoctorExercises() => ShowOnly(exercisesDoctorPanel);
     public void OnDoctorFeedback() => ShowOnly(feedbackDoctorPanel);
@@ -113,7 +113,7 @@ public class UserSelector : MonoBehaviour
     public void OnPatientStop() => ShowOnly(previewPatientPanel);
     public void OnPatientPlay() => ShowOnly(playFeedBackPatientPanel);
 
-public void ShowOnly(GameObject target, bool remember = true)
+    public void ShowOnly(GameObject target, bool remember = true)
     {
         Debug.Log("show only" + target);
         if (target == null) { Debug.Log("null"); return; }
@@ -133,16 +133,18 @@ public void ShowOnly(GameObject target, bool remember = true)
 
     private void GoBack()
     {
+        Debug.Log($"GoBack called. Stack count: {panelHistory.Count}");
         if (panelHistory.Count > 0)
         {
             GameObject previous = panelHistory.Pop();
-            ShowOnly(previous, remember:false);
+            ShowOnly(previous, remember: false);
         }
         else
         {
-            ShowOnly(menuPanel, remember:false);
+            ShowOnly(menuPanel, remember: false);
             AppState.CurrentUser = UserType.None;
         }
     }
+
 
 }

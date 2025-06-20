@@ -82,8 +82,7 @@ public class UIManager : MonoBehaviour
             editBtn.onClick.AddListener(() =>
             {
                 currentExerciseTitle = data.title;
-                onDoctorExercisePlay(currentExerciseTitle);
-                //userSelector.ShowOnly(userSelector.recordDoctorPanel); // playDoctorPanel needed
+                userSelector.ShowOnly(userSelector.playExerciseDoctorPanel); // playDoctorPanel needed
             });
     }
 
@@ -118,6 +117,7 @@ public class UIManager : MonoBehaviour
         if (btn != null)
             btn.onClick.AddListener(() =>
             {
+                Debug.LogWarning($"Performing exercise: {titleKey}");
                 userSelector.ShowOnly(userSelector.recordPatientPanel);
             });
     }
@@ -204,75 +204,106 @@ public class UIManager : MonoBehaviour
         Debug.LogWarning($"New exercise added: {currentExerciseTitle}");
     }
 
-    public void onDoctorExercisePlay(string currentExerciseTitle) {
-        Debug.LogWarning("Doctor plays his own exercise: " + currentExerciseTitle);
+    public void onDoctorExercisePlay() {
+        Debug.LogWarning($"Doctor plays his own exercise: {currentExerciseTitle} " );
        
     }
 
 
+    public void onDoctorExerciseStop()
+    {
+        Debug.LogWarning($"Doctor Stops his own exercise playing {currentExerciseTitle}");
 
+    }
 
     public void onDoctorStartRecording()
     {
-        Debug.LogWarning($"Doctor starts recording exercise: ");
+        Debug.LogWarning($"Doctor starts recording exercise: {currentExerciseTitle}");
       
 
     }
 
     public void onDoctorStopRecording()
     {
-        Debug.LogWarning($"Doctor stops recording exercise:  and goes to preview panel");
+        Debug.LogWarning($"Doctor stops recording exercise: {currentExerciseTitle} and goes to preview panel");
 
     }
 
-  public void onDoctorPreviewExercise()
-    {
-        Debug.LogWarning($"Doctor previews his own exercise before saving: ");
-    
 
-    }
     public void onDoctorRedoExercise()
-    {
-        Debug.Log("Doctor redoes the exercise recording");
+    { //do we even need this? we go back to recording panel again and it works any ways
+        Debug.Log($"Doctor redoes the exercise recording {currentExerciseTitle}");
     }
 
 
     //Doctor feedback section now
 
-    public void onDoctorGiveFeedback()
+    public void onDoctorStartFeedback(string feedbackID)
     {
-        Debug.Log("Doctor plays the recording ");
-        //todo more
+        Debug.Log($"Doctor starts giving one feedback {feedbackID}");
+        
+    }
+    public void onDoctorStopFeedback(string feedbackID)
+    {
+        Debug.Log($"Doctor stops giving that feedback {feedbackID}");
+       
     }
 
-   
+    public void onDoctorFinishAllFeedback()
+    {
+        Debug.Log($"Doctor finishes all feedback for exercise {currentExerciseTitle}");
+    }
+
+    public void onDoctorStartsAllFeedback()
+    {
+        Debug.Log($"Doctor starts giving feedback for exercise {currentExerciseTitle}");
+    }
+
+    public void onDoctorPlayPatientsExercise()
+    {
+        Debug.LogWarning($"Doctor plays patient's exercise: {currentExerciseTitle} for review and feedback");
+    }
+    public void onDoctorStopPatientExercise()
+    {
+        Debug.LogWarning($"Doctor stops patient's exercise playback: {currentExerciseTitle}");
+    }
+
     //Patient panel
     //exercise section
-    public void onPatientPerform()
-    {//patient watches the recording of doctor 
-        Debug.LogWarning($"Playback of doctor's performance with controls ");
-       
+   public void onPatientPlaysDoctorsExercise()
+    {
+        Debug.LogWarning($"Patient plays doctor's exercise: {currentExerciseTitle} for practice");
+    }
+    public void onPatientStopsDoctorsExercise()
+    {
+        Debug.LogWarning($"Patient stops doctor's exercise playback: {currentExerciseTitle}");
     }
     public void onPatientStartRecordingPerform()
     {
-        Debug.LogWarning($"Patient starts movement for this ");
+        Debug.LogWarning($"Patient starts movement for this {currentExerciseTitle}");
 
     }
     public void onPatientStoptRecordingPerform()
     {
-        Debug.LogWarning($"Patient stops movement for this ");
+        Debug.LogWarning($"Patient stops movement for this {currentExerciseTitle}");
 
     }
 
-    public void onPatientPreviewExercise()
+    public void onPatientPlayPreviewExercise()
     {
-        Debug.Log($"Patient previews/playback his own exercise before sending it to doctor");
+        Debug.Log($"Patient previews/playback his own exercise before sending it to doctor {currentExerciseTitle}");
+
+
+    }
+    public void onPatientStopPreviewExercise()
+    {
+        Debug.Log($"Patient stops his own exercise before sending it to doctor {currentExerciseTitle}");
 
 
     }
     public void onPatientRedoExercise()
     {
-        Debug.Log("Patient redoes the exercise recording");
+        Debug.Log($"Patient redoes the exercise recording {currentExerciseTitle}");
     }
 
 
@@ -284,7 +315,11 @@ public class UIManager : MonoBehaviour
    
         Debug.Log($"Feedback Playback for  {exerciseTitle} open on timestamp {timestamp}");
     }
-    //todo more
+   
+    public void onPatientStopFeedback(string exerciseTitle, string timestamp)
+    {
+        Debug.Log($"Feedback Playback for  {exerciseTitle} closed on timestamp {timestamp}");
+    }
 
 
     // public void RecordVideo() { }
