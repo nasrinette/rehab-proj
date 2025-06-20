@@ -41,6 +41,12 @@ public class UIManager : MonoBehaviour
     private string jsonPath;
     private string currentExerciseTitle = "";
 
+    //ui connections to implementations
+    public JointTracker jointTracker;
+    public JointPlayback jointPlayback;
+    public FeedbackDrawing feedbackDrawing;
+    // public RecordAudioComment recordAudioComment; idk why this was giving error, I commented
+
 
     void Start()
     {
@@ -64,9 +70,9 @@ public class UIManager : MonoBehaviour
         BindPerform(patientGO, data.title);
         BindSend(patientGO, data.title);
 
-        var editBtn = FindButton(doctorGO.transform, "Play button");
-        if (editBtn != null)
-            editBtn.onClick.AddListener(() =>
+      var playBtn = FindButton(doctorGO.transform, "Play button");
+        if (playBtn != null)
+            playBtn.onClick.AddListener(() =>
             {
                 currentExerciseTitle = data.title;
                 userSelector.ShowOnly(userSelector.playExerciseDoctorPanel);
@@ -305,6 +311,8 @@ public class UIManager : MonoBehaviour
         Debug.LogWarning($"Doctor finishes all feedback for exercise {currentExerciseTitle}");
     }
 
+
+    //not in use
     public void onDoctorStartsAllFeedback()
     {
         Debug.LogWarning($"Doctor starts giving feedback for exercise {currentExerciseTitle}");
@@ -313,16 +321,14 @@ public class UIManager : MonoBehaviour
     public void onDoctorPlayPatientsExercise()
     {
         Debug.LogWarning($"Doctor plays patient's exercise: {currentExerciseTitle} for review and feedback");
-<<<<<<< HEAD
-=======
         jointPlayback.SetRecordingToPlay("Patient_" + currentExerciseTitle); // Set the exercise to play
 
         jointPlayback.Stop();
->>>>>>> 5188d96ff3e60acccd67efa5c3fa3a59fe635aab
     }
     public void onDoctorStopPatientExercise()
     {
         Debug.LogWarning($"Doctor stops patient's exercise playback: {currentExerciseTitle}");
+        jointPlayback.Stop();
     }
 
     //Patient panel
@@ -330,49 +336,45 @@ public class UIManager : MonoBehaviour
    public void onPatientPlaysDoctorsExercise()
     {
         Debug.LogWarning($"Patient plays doctor's exercise: {currentExerciseTitle} for practice");
-<<<<<<< HEAD
-=======
         jointPlayback.SetRecordingToPlay("Doctor_" + currentExerciseTitle); // Set the exercise to play
 
         jointPlayback.Play();
->>>>>>> 5188d96ff3e60acccd67efa5c3fa3a59fe635aab
     }
     public void onPatientStopsDoctorsExercise()
     {
         Debug.LogWarning($"Patient stops doctor's exercise playback: {currentExerciseTitle}");
+        jointPlayback.Stop();
     }
     public void onPatientStartRecordingPerform()
     {
         Debug.LogWarning($"Patient starts movement for this {currentExerciseTitle}");
-
+        jointTracker.NewExercise(currentExerciseTitle, true);
+        jointTracker.StartRecording();
     }
     public void onPatientStoptRecordingPerform()
     {
         Debug.LogWarning($"Patient stops movement for this {currentExerciseTitle}");
-
+        jointTracker.StopRecording();
     }
 
     public void onPatientPlayPreviewExercise()
     {
         Debug.LogWarning($"Patient previews/playback his own exercise before sending it to doctor {currentExerciseTitle}");
-<<<<<<< HEAD
-
-=======
         jointPlayback.SetRecordingToPlay("Patient_" + currentExerciseTitle); // Set the exercise to play
 
         jointPlayback.Play();
->>>>>>> 5188d96ff3e60acccd67efa5c3fa3a59fe635aab
 
     }
     public void onPatientStopPreviewExercise()
     {
         Debug.LogWarning($"Patient stops his own exercise before sending it to doctor {currentExerciseTitle}");
-
-
+        jointPlayback.Stop();
     }
     public void onPatientRedoExercise()
     {
         Debug.LogWarning($"Patient redoes the exercise recording {currentExerciseTitle}");
+        jointTracker.NewExercise(currentExerciseTitle, true);
+        jointTracker.StartRecording();
     }
 
 
@@ -381,13 +383,15 @@ public class UIManager : MonoBehaviour
     public void onPatientPlayFeedback(string exerciseTitle, string timestamp) 
    
     {
-   
         Debug.LogWarning($"Feedback Playback for  {exerciseTitle} open on timestamp {timestamp}");
+        feedbackDrawing.SetExerciseName(exerciseTitle, timestamp);
+        feedbackDrawing.startPlayback();
     }
    
     public void onPatientStopFeedback(string exerciseTitle, string timestamp)
     {
         Debug.LogWarning($"Feedback Playback for  {exerciseTitle} closed on timestamp {timestamp}");
+        feedbackDrawing.StopPlayback();
     }
 
 
