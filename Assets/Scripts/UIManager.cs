@@ -216,26 +216,32 @@ public class UIManager : MonoBehaviour
 
     public void onDoctorExercisePlay() {
         Debug.LogWarning($"Doctor plays his own exercise: {currentExerciseTitle} " );
-       
+        jointPlayback.SetRecordingToPlay("Doctor_"+currentExerciseTitle); // Set the exercise to play
+        jointPlayback.Play(); // Start playback of the doctor's exercise
+
     }
 
 
     public void onDoctorExerciseStop()
     {
         Debug.LogWarning($"Doctor Stops his own exercise playing {currentExerciseTitle}");
+        jointPlayback.Stop(); // Stop playback of the doctor's exercise
 
     }
 
     public void onDoctorStartRecording()
     {
         Debug.LogWarning($"Doctor starts recording exercise: {currentExerciseTitle}");
-      
+        jointTracker.NewExercise(currentExerciseTitle, false); // false indicates it's a doctor's exercise
+        jointTracker.StartRecording();
+
 
     }
 
     public void onDoctorStopRecording()
     {
         Debug.LogWarning($"Doctor stops recording exercise: {currentExerciseTitle} and goes to preview panel");
+        jointTracker.StopRecording(); // Stop the recording
 
     }
 
@@ -243,6 +249,8 @@ public class UIManager : MonoBehaviour
     public void onDoctorRedoExercise()
     { //do we even need this? we go back to recording panel again and it works any ways
         Debug.LogWarning($"Doctor redoes the exercise recording {currentExerciseTitle}");
+        jointTracker.NewExercise(currentExerciseTitle, false); // false indicates it's a doctor's exercise
+        jointTracker.StartRecording(); // Start a new recording session
     }
 
 
@@ -274,6 +282,8 @@ public class UIManager : MonoBehaviour
     public void onDoctorPlayPatientsExercise()
     {
         Debug.LogWarning($"Doctor plays patient's exercise: {currentExerciseTitle} for review and feedback");
+        jointPlayback.SetRecordingToPlay("Patient_" + currentExerciseTitle); // Set the exercise to play
+
         jointPlayback.Stop();
     }
     public void onDoctorStopPatientExercise()
@@ -287,7 +297,8 @@ public class UIManager : MonoBehaviour
    public void onPatientPlaysDoctorsExercise()
     {
         Debug.LogWarning($"Patient plays doctor's exercise: {currentExerciseTitle} for practice");
-        jointPlayback.SetRecordingToPlay(currentExerciseTitle);
+        jointPlayback.SetRecordingToPlay("Doctor_" + currentExerciseTitle); // Set the exercise to play
+
         jointPlayback.Play();
     }
     public void onPatientStopsDoctorsExercise()
@@ -310,7 +321,8 @@ public class UIManager : MonoBehaviour
     public void onPatientPlayPreviewExercise()
     {
         Debug.LogWarning($"Patient previews/playback his own exercise before sending it to doctor {currentExerciseTitle}");
-        jointPlayback.SetRecordingToPlay(currentExerciseTitle);
+        jointPlayback.SetRecordingToPlay("Patient_" + currentExerciseTitle); // Set the exercise to play
+
         jointPlayback.Play();
 
     }

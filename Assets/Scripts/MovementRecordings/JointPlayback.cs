@@ -80,14 +80,14 @@ public class JointPlayback : MonoBehaviour
             int idx = 0;
             f.time = float.Parse(cols[idx++]);
             f.headPos = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
-            //f.headRot = Vector3.zero; idx++; idx++; idx++;  //
-            f.headRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
+            f.headRot = Vector3.zero; idx++; idx++; idx++;  //
+            //f.headRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             f.leftHandPos = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
-            //f.leftHandRot = Vector3.zero; idx++; idx++; idx++;
-            f.leftHandRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
+            f.leftHandRot = Vector3.zero; idx++; idx++; idx++;
+            //f.leftHandRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             f.rightHandPos = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
-            //f.rightHandRot = Vector3.zero; idx++; idx++; idx++; 
-            f.rightHandRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
+            f.rightHandRot = Vector3.zero; idx++; idx++; idx++; 
+            //f.rightHandRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             frames.Add(f);
         }
     }
@@ -113,17 +113,17 @@ public class JointPlayback : MonoBehaviour
     {
         if (head != null)
         {
-            head.position = f.headPos;
+            head.localPosition = f.headPos;
             head.rotation = Quaternion.Euler(f.headRot);
         }
         if (leftHand != null)
         {
-            leftHand.position = f.leftHandPos;
+            leftHand.localPosition = f.leftHandPos;
             leftHand.rotation = Quaternion.Euler(f.leftHandRot);
         }
         if (rightHand != null)
         {
-            rightHand.position = f.rightHandPos;
+            rightHand.localPosition = f.rightHandPos;
             rightHand.rotation = Quaternion.Euler(f.rightHandRot);
         }
     }
@@ -136,7 +136,7 @@ public class JointPlayback : MonoBehaviour
     public void SetRecordingToPlay(string recordingName)
     {
         if (isPlaying) Stop(); // Stop current playback if it's in progress
-        exerciseName = recordingName;
+        exerciseName = recordingName + ".csv";
         csvFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "MovementRecordings", exerciseName);
         LoadCsv();
 

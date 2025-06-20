@@ -50,7 +50,7 @@ public class JointTracker : MonoBehaviour
 
     private IEnumerator AssignJointsAfterDelay()
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(10f);
 
         if (head == null) head = entityGO.Find("Joint Head");
         if (leftHand == null) leftHand = entityGO.Find("Joint LeftHandWrist");
@@ -81,6 +81,8 @@ public class JointTracker : MonoBehaviour
         while (head == null || leftHand == null || rightHand == null)
             yield return null;
 
+        Debug.Log("Starting joint logging...");
+
         while (true)
         {
             Vector3 headRot = head.rotation.eulerAngles;
@@ -92,12 +94,13 @@ public class JointTracker : MonoBehaviour
                 "{7},{8},{9},{10},{11},{12}," +
                 "{13},{14},{15},{16},{17},{18}",
                 timeStamp,
-                head.position.x, head.position.y, head.position.z, headRot.x, headRot.y, headRot.z,
-                leftHand.position.x, leftHand.position.y, leftHand.position.z, leftHandRot.x, leftHandRot.y, leftHandRot.z,
-                rightHand.position.x, rightHand.position.y, rightHand.position.z, rightHandRot.x, rightHandRot.y, rightHandRot.z
+                head.localPosition.x, head.localPosition.y, head.localPosition.z, headRot.x, headRot.y, headRot.z,
+                leftHand.localPosition.x, leftHand.localPosition.y, leftHand.localPosition.z, leftHandRot.x, leftHandRot.y, leftHandRot.z,
+                rightHand.localPosition.x, rightHand.localPosition.y, rightHand.localPosition.z, rightHandRot.x, rightHandRot.y, rightHandRot.z
             );
             File.AppendAllText(csvFilePath, line + "\n");
 
+            Debug.Log("Logged joint positions at time: " + timeStamp);
             yield return new WaitForSeconds(0.2f);
         }
     }
