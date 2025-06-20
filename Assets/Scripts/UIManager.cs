@@ -23,6 +23,10 @@ public class UIManager : MonoBehaviour
     public UserSelector userSelector;
     public GameObject doctorExercisePrefab;
     public GameObject patientExercisePrefab;
+    public GameObject doctorFeedbackPrefab;
+    public GameObject patientPerformedPrefab;
+    public Transform contentFeedbackDoctor;
+    public Transform contentFeedbackPatient;
     public Transform contentParentDoctor;
     public Transform contentParentPatient;
     public Transform contentFeedback;
@@ -31,6 +35,8 @@ public class UIManager : MonoBehaviour
 
     private readonly Dictionary<string, GameObject> doctorDict  = new();
     private readonly Dictionary<string, GameObject> patientDict = new();
+    private readonly Dictionary<string, GameObject> doctorFbDict  = new();
+    private readonly Dictionary<string, GameObject> patientFbDict = new();
     private ExerciseList exerciseList = new();
     private string jsonPath;
     private string currentExerciseTitle = "";
@@ -42,26 +48,6 @@ public class UIManager : MonoBehaviour
         LoadExercisesFromJson();
         RenderAllExercises();
     }
-
-
-    // public void OnContinueAddExercise()
-    // {
-    //     string title = titleInput.text.Trim();
-    //     string description = descriptionInput.text.Trim();
-    //     if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(description))
-    //     {
-    //         Debug.Log("Please input Title and Description！");
-    //         return;
-    //     }
-
-    //     var data = new ExerciseData { title = title, description = description };
-    //     exerciseList.exercises.Add(data);
-    //     SaveExercisesToJson();
-
-    //     CreateTwinItems(data);
-    //     titleInput.text = "";
-    //     descriptionInput.text = "";
-    // }
 
     private void CreateTwinItems(ExerciseData data)
     {
@@ -76,14 +62,19 @@ public class UIManager : MonoBehaviour
         BindRemove(doctorGO, data.title);
         BindRemove(patientGO, data.title);
         BindPerform(patientGO, data.title);
+        BindSend(patientGO, data.title);
 
         var editBtn = FindButton(doctorGO.transform, "Play button");
         if (editBtn != null)
             editBtn.onClick.AddListener(() =>
             {
                 currentExerciseTitle = data.title;
-                userSelector.ShowOnly(userSelector.playExerciseDoctorPanel); // playDoctorPanel needed
+                userSelector.ShowOnly(userSelector.playExerciseDoctorPanel);
             });
+
+        var fbBtn = FindButton(doctorGO.transform, "Give Feedback button");
+        if (fbBtn != null)
+            fbBtn.onClick.AddListener(() => SendFeedbackToPatient(data.title, fbBtn));
     }
 
     private void RemoveByTitle(string title)
@@ -121,6 +112,57 @@ public class UIManager : MonoBehaviour
                 currentExerciseTitle = titleKey; 
                 userSelector.ShowOnly(userSelector.recordPatientPanel);
             });
+    }
+
+    private void BindSend(GameObject go, string title)
+    {
+        var btn = FindButton(go.transform, "Send button");
+        if (btn != null)
+            btn.onClick.AddListener(() => SendExerciseToDoctor(title, btn));
+    }
+
+    private void BindFeedback(GameObject go, string title)
+    {
+        var btn = FindButton(go.transform, "Feedback button");
+        if (btn != null)
+            btn.onClick.AddListener(() => SendFeedbackToPatient(title, btn));
+    }
+
+    private void BindPerformFeedbackPatient(GameObject go, string title)
+    {
+        // Patient 侧“Performed”条目如果还有播放按钮可在此绑定
+    }
+
+    private void SendExerciseToDoctor(string title, Button sendBtn)
+    {
+        // 克隆到 Doctor Feedback 列表
+        if (!doctorFbDict.ContainsKey(title))
+        {
+            var fbGO = Instantiate(doctorFeedbackPrefab, contentFeedbackDoctor);
+            InitItemUI(fbGO, exerciseList.exercises.Find(e => e.title == title));
+            BindFeedback(fbGO, title);
+            doctorFbDict[title] = fbGO;
+        }
+
+        // 修改 Patient 侧条目外观
+        sendBtn.interactable = false;
+        var txt = sendBtn.GetComponentInChildren<TMP_Text>();
+        if (txt) txt.text = "Performed";
+    }
+
+    /* ---------- 6. Feedback 逻辑 ---------- */
+    private void SendFeedbackToPatient(string title, Button fbBtn)
+    {
+        if (!patientFbDict.ContainsKey(title))
+        {
+            var perfGO = Instantiate(patientPerformedPrefab, contentFeedbackPatient);
+            InitItemUI(perfGO, exerciseList.exercises.Find(e => e.title == title));
+            patientFbDict[title] = perfGO;
+        }
+
+        fbBtn.interactable = false;
+        var txt = fbBtn.GetComponentInChildren<TMP_Text>();
+        if (txt) txt.text = "Feedback Sent";
     }
 
     private Button FindButton(Transform root, string btnName)
