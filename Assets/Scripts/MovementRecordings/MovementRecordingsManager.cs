@@ -26,7 +26,7 @@ public class MovementRecordingsManager : MonoBehaviour
         //{
         //    Debug.Log("Timestamp: " + timestamp);
         //}
-        //generateFeedBackUI(UImanager.contentFeedback, "Patient_dr");
+        generateFeedBackUI(UImanager.contentFeedback, "Patient_dr");
     }
     public FeedbackList MakeFeedbackListFromFiles(string exerciseName) // exercisename should be like "Patient_DrawingExercise" or "Doctor_DrawingExercise"
     {

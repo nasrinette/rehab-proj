@@ -4,7 +4,7 @@ using System.IO;
 using System.Net;
 using UnityEngine;
 
-public class RecordAudio : MonoBehaviour
+public class RecordAudioComment : MonoBehaviour
 {
     private AudioClip recordedClip;
     [SerializeField] AudioSource audioSource;
