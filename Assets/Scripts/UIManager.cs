@@ -118,6 +118,7 @@ public class UIManager : MonoBehaviour
             btn.onClick.AddListener(() =>
             {
                 Debug.LogWarning($"Performing exercise: {titleKey}");
+                currentExerciseTitle = titleKey; 
                 userSelector.ShowOnly(userSelector.recordPatientPanel);
             });
     }
@@ -232,7 +233,7 @@ public class UIManager : MonoBehaviour
 
     public void onDoctorRedoExercise()
     { //do we even need this? we go back to recording panel again and it works any ways
-        Debug.Log($"Doctor redoes the exercise recording {currentExerciseTitle}");
+        Debug.LogWarning($"Doctor redoes the exercise recording {currentExerciseTitle}");
     }
 
 
@@ -240,23 +241,23 @@ public class UIManager : MonoBehaviour
 
     public void onDoctorStartFeedback(string feedbackID)
     {
-        Debug.Log($"Doctor starts giving one feedback {feedbackID}");
+        Debug.LogWarning($"Doctor starts giving one feedback {feedbackID}");
         
     }
     public void onDoctorStopFeedback(string feedbackID)
     {
-        Debug.Log($"Doctor stops giving that feedback {feedbackID}");
+        Debug.LogWarning($"Doctor stops giving that feedback {feedbackID}");
        
     }
 
     public void onDoctorFinishAllFeedback()
     {
-        Debug.Log($"Doctor finishes all feedback for exercise {currentExerciseTitle}");
+        Debug.LogWarning($"Doctor finishes all feedback for exercise {currentExerciseTitle}");
     }
 
     public void onDoctorStartsAllFeedback()
     {
-        Debug.Log($"Doctor starts giving feedback for exercise {currentExerciseTitle}");
+        Debug.LogWarning($"Doctor starts giving feedback for exercise {currentExerciseTitle}");
     }
 
     public void onDoctorPlayPatientsExercise()
@@ -291,19 +292,19 @@ public class UIManager : MonoBehaviour
 
     public void onPatientPlayPreviewExercise()
     {
-        Debug.Log($"Patient previews/playback his own exercise before sending it to doctor {currentExerciseTitle}");
+        Debug.LogWarning($"Patient previews/playback his own exercise before sending it to doctor {currentExerciseTitle}");
 
 
     }
     public void onPatientStopPreviewExercise()
     {
-        Debug.Log($"Patient stops his own exercise before sending it to doctor {currentExerciseTitle}");
+        Debug.LogWarning($"Patient stops his own exercise before sending it to doctor {currentExerciseTitle}");
 
 
     }
     public void onPatientRedoExercise()
     {
-        Debug.Log($"Patient redoes the exercise recording {currentExerciseTitle}");
+        Debug.LogWarning($"Patient redoes the exercise recording {currentExerciseTitle}");
     }
 
 
@@ -313,12 +314,12 @@ public class UIManager : MonoBehaviour
    
     {
    
-        Debug.Log($"Feedback Playback for  {exerciseTitle} open on timestamp {timestamp}");
+        Debug.LogWarning($"Feedback Playback for  {exerciseTitle} open on timestamp {timestamp}");
     }
    
     public void onPatientStopFeedback(string exerciseTitle, string timestamp)
     {
-        Debug.Log($"Feedback Playback for  {exerciseTitle} closed on timestamp {timestamp}");
+        Debug.LogWarning($"Feedback Playback for  {exerciseTitle} closed on timestamp {timestamp}");
     }
 
 
