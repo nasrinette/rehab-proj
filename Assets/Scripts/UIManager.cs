@@ -268,6 +268,12 @@ public class UIManager : MonoBehaviour
 
     }
 
+    public void onDoctorExercisePause()
+    {
+        Debug.LogWarning($"Doctor pauses his own exercise playing {currentExerciseTitle}");
+        jointPlayback.Pause(); // Pause playback of the doctor's exercise
+    }
+
     public void onDoctorStartRecording()
     {
         Debug.LogWarning($"Doctor starts recording exercise: {currentExerciseTitle}");
@@ -345,13 +351,19 @@ public class UIManager : MonoBehaviour
         Debug.LogWarning($"Patient stops doctor's exercise playback: {currentExerciseTitle}");
         jointPlayback.Stop();
     }
+    public void onPatientPausesDoctorsExercise()
+    {
+        Debug.LogWarning($"Patient pauses doctor's exercise playback: {currentExerciseTitle}");
+        jointPlayback.Pause(); // Pause playback of the doctor's exercise
+
+    }
     public void onPatientStartRecordingPerform()
     {
         Debug.LogWarning($"Patient starts movement for this {currentExerciseTitle}");
         jointTracker.NewExercise(currentExerciseTitle, true);
         jointTracker.StartRecording();
     }
-    public void onPatientStoptRecordingPerform()
+    public void onPatientStopRecordingPerform()
     {
         Debug.LogWarning($"Patient stops movement for this {currentExerciseTitle}");
         jointTracker.StopRecording();
@@ -369,6 +381,11 @@ public class UIManager : MonoBehaviour
     {
         Debug.LogWarning($"Patient stops his own exercise before sending it to doctor {currentExerciseTitle}");
         jointPlayback.Stop();
+    }
+    public void onPatientPausePreviewExercise()
+    {
+        Debug.LogWarning($"Patient pauses his own exercise before sending it to doctor {currentExerciseTitle}");
+        jointPlayback.Pause(); // Pause playback of the patient's exercise
     }
     public void onPatientRedoExercise()
     {
