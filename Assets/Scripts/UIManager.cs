@@ -395,6 +395,11 @@ public class UIManager : MonoBehaviour
     // movements
     public void onStartPlay(bool isExerciseByPatient) 
     {
+        onStopPlay();
+        onStopRecord();
+        onStopPlayFeedback();
+        onStopRecordFeedback();
+
         isPatient = isExerciseByPatient;
         patientString = isPatient ? "Patient_" : "Doctor_";
         if (currentExerciseTitle.Contains("Patient") || currentExerciseTitle.Contains("Doctor")) patientString = "";
@@ -409,6 +414,11 @@ public class UIManager : MonoBehaviour
 
     public void onStartRecord(bool isExerciseByPatient) 
     {
+        onStopPlay();
+        onStopRecord();
+        onStopPlayFeedback();
+        onStopRecordFeedback();
+
         isPatient = isExerciseByPatient;
         jointTracker.NewExercise(currentExerciseTitle, isPatient);
         jointTracker.StartRecording();
@@ -418,6 +428,12 @@ public class UIManager : MonoBehaviour
     //feedback
     public void onStartRecordFeedback() 
     {
+        //onStopPlay();
+        onPausePlay();
+        onStopRecord();
+        onStopPlayFeedback();
+        onStopRecordFeedback();
+
         feedbackDrawing.SetExerciseName(currentExerciseTitle, playbackTime.ToString());
         feedbackDrawing.setRecordingOn();
 
@@ -431,7 +447,15 @@ public class UIManager : MonoBehaviour
     }
 
     public void onStartPlayFeedback(string exerciseName, string timestamp) // already bound in movementRecordingsManager.cs
-    { 
+    {
+        //onStopPlay();
+        onPausePlay();
+        onStopRecord();
+        onStopPlayFeedback();
+        onStopRecordFeedback();
+
+        jointPlayback.Seek(float.Parse(timestamp));
+
         feedbackDrawing.SetExerciseName(exerciseName, timestamp);
         feedbackDrawing.startPlayback();
 
