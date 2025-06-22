@@ -29,6 +29,7 @@ public class UIManager : MonoBehaviour
     public Transform contentFeedbackPatient;
     public Transform contentParentDoctor;
     public Transform contentParentPatient;
+    public Transform contentPlayFeedback;
     public TMP_InputField titleInput;
     public TMP_InputField descriptionInput;
 
@@ -70,7 +71,7 @@ public class UIManager : MonoBehaviour
     private void Update()
     {
         patientString = isPatient ? "Patient_" : "Doctor_";
-        if (playbackSlider.IsActive()) moveSlider();
+        if (playbackSlider!= null && playbackSlider.IsActive()) moveSlider();
     }
 
     private void CreateTwinItems(ExerciseData data)
