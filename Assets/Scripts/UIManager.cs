@@ -396,7 +396,11 @@ public class UIManager : MonoBehaviour
         FindObjectsOfType<LineRenderer>().ToList();
         foreach (var line in FindObjectsOfType<LineRenderer>())
         {
-            if (line.gameObject.tag == "FeedbackLine") Destroy(line.gameObject);
+            if (line.gameObject.tag == "FeedbackLine")
+            {
+                Debug.Log("remove feedback line: " + line.gameObject.name);
+                Destroy(line.gameObject);
+            }
         }
     }
 
@@ -434,6 +438,7 @@ public class UIManager : MonoBehaviour
         if (currentExerciseTitle.Contains("Doctor") || currentExerciseTitle.Contains("Patient"))
         {
             var tempList = currentExerciseTitle.Split('_').ToList();
+            tempList.ForEach(ft => Debug.Log("june" + ft));
             tempList.RemoveAt(0);
             currentExerciseTitle = string.Join("_", tempList);
         }
@@ -455,14 +460,14 @@ public class UIManager : MonoBehaviour
         feedbackDrawing.SetExerciseName(currentExerciseTitle, playbackTime.ToString());
         feedbackDrawing.setRecordingOn();
 
-        recordAudio.StartRecording();
+        //recordAudio.StartRecording();
     }
     public void onStopRecordFeedback()
     {
         feedbackDrawing.setRecordingOff();
         removeAllFeedbackLines();
 
-        recordAudio.StopRecording(currentExerciseTitle, playbackTime.ToString());
+        //recordAudio.StopRecording(currentExerciseTitle, playbackTime.ToString());
     }
     public void onStartPlayFeedback(string exerciseName, string timestamp) // already bound in movementRecordingsManager.cs
     {
@@ -479,8 +484,8 @@ public class UIManager : MonoBehaviour
         feedbackDrawing.SetExerciseName(exerciseName, timestamp);
         feedbackDrawing.startPlayback();
 
-        recordAudio.LoadRecording(exerciseName, timestamp);
-        recordAudio.StartPlayback();
+        //recordAudio.LoadRecording(exerciseName, timestamp);
+        //recordAudio.StartPlayback();
     }
     public void onStopPlayFeedback()
     {
@@ -488,7 +493,7 @@ public class UIManager : MonoBehaviour
 
         removeAllFeedbackLines();
 
-        recordAudio.StopPlayback();
+        //recordAudio.StopPlayback();
     }
     #endregion
 
