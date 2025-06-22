@@ -449,12 +449,13 @@ public class UIManager : MonoBehaviour
     public void onStartPlayFeedback(string exerciseName, string timestamp) // already bound in movementRecordingsManager.cs
     {
         //onStopPlay();
-        onPausePlay();
+
         onStopRecord();
         onStopPlayFeedback();
         onStopRecordFeedback();
 
         jointPlayback.Seek(float.Parse(timestamp));
+        onPausePlay();
 
         feedbackDrawing.SetExerciseName(exerciseName, timestamp);
         feedbackDrawing.startPlayback();
