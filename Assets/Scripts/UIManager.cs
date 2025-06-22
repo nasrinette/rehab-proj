@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.IO;
+using System.Linq;
 
 [System.Serializable]
 public class ExerciseData
@@ -420,6 +421,12 @@ public class UIManager : MonoBehaviour
         onStopRecordFeedback();
 
         isPatient = isExerciseByPatient;
+        if (currentExerciseTitle.Contains("Doctor") || currentExerciseTitle.Contains("Patient"))
+        {
+            var tempList = currentExerciseTitle.Split('_').ToList();
+            tempList.RemoveAt(0);
+            currentExerciseTitle = string.Join("_", tempList);
+        }
         jointTracker.NewExercise(currentExerciseTitle, isPatient);
         jointTracker.StartRecording();
     }
@@ -445,7 +452,6 @@ public class UIManager : MonoBehaviour
 
         recordAudio.StopRecording(currentExerciseTitle, playbackTime.ToString());
     }
-
     public void onStartPlayFeedback(string exerciseName, string timestamp) // already bound in movementRecordingsManager.cs
     {
         //onStopPlay();
