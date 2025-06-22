@@ -92,9 +92,9 @@ public class JointTracker : MonoBehaviour
 
         while (true)
         {
-            Vector3 headRot = head.rotation.eulerAngles;
-            Vector3 leftHandRot = leftHand.rotation.eulerAngles;
-            Vector3 rightHandRot = rightHand.rotation.eulerAngles;
+            Vector3 headRot = head.localRotation.eulerAngles;
+            Vector3 leftHandRot = leftHand.localRotation.eulerAngles;
+            Vector3 rightHandRot = rightHand.localRotation.eulerAngles;
 
             var line = string.Format("{0}," +
                 "{1},{2},{3},{4},{5},{6}," +

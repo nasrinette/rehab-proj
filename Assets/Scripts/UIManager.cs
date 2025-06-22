@@ -351,6 +351,8 @@ public class UIManager : MonoBehaviour
         jointPlayback.Seek(playbackSlider.value); 
     }
 
+
+    #region ui functions simple
     // movements
     public void onStartPlay(bool isExerciseByPatient) 
     {
@@ -402,76 +404,70 @@ public class UIManager : MonoBehaviour
 
         recordAudio.StopPlayback();
     }
+    #endregion
 
     #region old ui connection functions
 
     public void onDoctorExercisePlay() {
         Debug.LogWarning($"Doctor plays his own exercise: {currentExerciseTitle} " );
-        jointPlayback.SetRecordingToPlay("Doctor_"+currentExerciseTitle); // Set the exercise to play
-        jointPlayback.Play(); // Start playback of the doctor's exercise
-
+        onStartPlay(false);
     }
 
 
     public void onDoctorExerciseStop()
     {
         Debug.LogWarning($"Doctor Stops his own exercise playing {currentExerciseTitle}");
-        jointPlayback.Stop(); // Stop playback of the doctor's exercise
-
+        onStopPlay();
     }
 
     public void onDoctorExercisePause()
     {
         Debug.LogWarning($"Doctor pauses his own exercise playing {currentExerciseTitle}");
-        jointPlayback.Pause(); // Pause playback of the doctor's exercise
+        onPausePlay();
     }
 
     public void onDoctorStartRecording()
     {
         Debug.LogWarning($"Doctor starts recording exercise: {currentExerciseTitle}");
-        jointTracker.NewExercise(currentExerciseTitle, false); // false indicates it's a doctor's exercise
-        jointTracker.StartRecording();
-
-
+        onStartRecord(false);
     }
 
     public void onDoctorStopRecording()
     {
         Debug.LogWarning($"Doctor stops recording exercise: {currentExerciseTitle} and goes to preview panel");
-        jointTracker.StopRecording(); // Stop the recording
-
+        onStopRecord();
     }
 
 
     public void onDoctorRedoExercise()
     { //do we even need this? we go back to recording panel again and it works any ways
         Debug.LogWarning($"Doctor redoes the exercise recording {currentExerciseTitle}");
-        jointTracker.NewExercise(currentExerciseTitle, false); // false indicates it's a doctor's exercise
-        jointTracker.StartRecording(); // Start a new recording session
+        onStartRecord(false);
     }
 
 
     //Doctor feedback section now
 
-    public void onDoctorStartFeedback(string feedbackID)
+    public void onDoctorStartFeedback()
     {
-        Debug.LogWarning($"Doctor starts giving one feedback {feedbackID}");
-        
+        Debug.LogWarning($"Doctor starts giving one feedback");
+        onStartRecordFeedback();
     }
-    public void onDoctorStopFeedback(string feedbackID)
+    public void onDoctorStopFeedback()
     {
-        Debug.LogWarning($"Doctor stops giving that feedback {feedbackID}");
-       
+        Debug.LogWarning($"Doctor stops giving that feedback ");
+        onStopRecordFeedback();
+
     }
 
-    public void onDoctorFinishAllFeedback()
+    public void onDoctorFinishAllFeedback() //TODO what is this
     {
         Debug.LogWarning($"Doctor finishes all feedback for exercise {currentExerciseTitle}");
     }
 
 
     //not in use
-    public void onDoctorStartsAllFeedback()
+    public void onDoctorStartsAllFeedback() //TODO what is this
     {
         Debug.LogWarning($"Doctor starts giving feedback for exercise {currentExerciseTitle}");
     }
@@ -479,14 +475,12 @@ public class UIManager : MonoBehaviour
     public void onDoctorPlayPatientsExercise()
     {
         Debug.LogWarning($"Doctor plays patient's exercise: {currentExerciseTitle} for review and feedback");
-        jointPlayback.SetRecordingToPlay("Patient_" + currentExerciseTitle); // Set the exercise to play
-
-        jointPlayback.Stop();
+        onStartPlay(true); 
     }
     public void onDoctorStopPatientExercise()
     {
         Debug.LogWarning($"Doctor stops patient's exercise playback: {currentExerciseTitle}");
-        jointPlayback.Stop();
+        onStopPlay();
     }
 
     //Patient panel
@@ -494,45 +488,38 @@ public class UIManager : MonoBehaviour
    public void onPatientPlaysDoctorsExercise()
     {
         Debug.LogWarning($"Patient plays doctor's exercise: {currentExerciseTitle} for practice");
-        jointPlayback.SetRecordingToPlay("Doctor_" + currentExerciseTitle); // Set the exercise to play
-
-        jointPlayback.Play();
+        onStartPlay(false);
     }
     public void onPatientStopsDoctorsExercise()
     {
         Debug.LogWarning($"Patient stops doctor's exercise playback: {currentExerciseTitle}");
-        jointPlayback.Stop();
+        onStopPlay();
     }
     public void onPatientPausesDoctorsExercise()
     {
         Debug.LogWarning($"Patient pauses doctor's exercise playback: {currentExerciseTitle}");
-        jointPlayback.Pause(); // Pause playback of the doctor's exercise
-
+        onPausePlay();
     }
     public void onPatientStartRecordingPerform()
     {
         Debug.LogWarning($"Patient starts movement for this {currentExerciseTitle}");
-        jointTracker.NewExercise(currentExerciseTitle, true);
-        jointTracker.StartRecording();
+        onStartRecord(true);
     }
     public void onPatientStopRecordingPerform()
     {
         Debug.LogWarning($"Patient stops movement for this {currentExerciseTitle}");
-        jointTracker.StopRecording();
+        onStopRecord();
     }
 
     public void onPatientPlayPreviewExercise()
     {
         Debug.LogWarning($"Patient previews/playback his own exercise before sending it to doctor {currentExerciseTitle}");
-        jointPlayback.SetRecordingToPlay("Patient_" + currentExerciseTitle); // Set the exercise to play
-
-        jointPlayback.Play();
-
+        onStartPlay(true); 
     }
     public void onPatientStopPreviewExercise()
     {
         Debug.LogWarning($"Patient stops his own exercise before sending it to doctor {currentExerciseTitle}");
-        jointPlayback.Stop();
+        onStopPlay();
     }
     public void onPatientPausePreviewExercise()
     {
@@ -542,22 +529,21 @@ public class UIManager : MonoBehaviour
     public void onPatientRedoExercise()
     {
         Debug.LogWarning($"Patient redoes the exercise recording {currentExerciseTitle}");
-        jointTracker.NewExercise(currentExerciseTitle, true);
-        jointTracker.StartRecording();
+        onStartRecord(true); 
     }
 
 
     //feedback section
 
-    public void onPatientPlayFeedback(string exerciseTitle, string timestamp) 
-   
+    public void onPatientPlayFeedback(string exerciseTitle, string timestamp) // auto added through movementRecordingsManager.cs
+
     {
-        Debug.LogWarning($"Feedback Playback for  {exerciseTitle} open on timestamp {timestamp}");
-        feedbackDrawing.SetExerciseName(exerciseTitle, timestamp);
-        feedbackDrawing.startPlayback();
+        //Debug.LogWarning($"Feedback Playback for  {exerciseTitle} open on timestamp {timestamp}");
+        //onStartPlayFeedback(exerciseTitle, timestamp);
+        Debug.LogError("method should not be called like this, call onStartPlayFeedback instead");
     }
    
-    public void onPatientStopFeedback(string exerciseTitle, string timestamp)
+    public void onPatientStopFeedback(string exerciseTitle, string timestamp) //TODO no stop button
     {
         Debug.LogWarning($"Feedback Playback for  {exerciseTitle} closed on timestamp {timestamp}");
         feedbackDrawing.StopPlayback();
