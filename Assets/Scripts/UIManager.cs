@@ -44,14 +44,33 @@ public class UIManager : MonoBehaviour
     public JointTracker jointTracker;
     public JointPlayback jointPlayback;
     public FeedbackDrawing feedbackDrawing;
-    // public RecordAudioComment recordAudioComment; idk why this was giving error, I commented
+    public RecordAudio recordAudio;
+
+    public MovementRecordingsManager movementRecordingsManager;
+
+    //playback variables
+    public float playbackTime = 0f;
+    public float maxPlaybackTime = 0f;
+
+    public Slider playbackSlider;
+    //public bool isPlayingExercise=false;
+
+    public string patientString;
+    public bool isPatient = false;
 
 
     void Start()
     {
         jsonPath = Path.Combine(Application.persistentDataPath, "exercises.json");
-        LoadExercisesFromJson();
+        //LoadExercisesFromJson();
+        LoadExercisesFromFiles(isPatient: false); 
         RenderAllExercises();
+    }
+
+    private void Update()
+    {
+        patientString = isPatient ? "Patient_" : "Doctor_";
+        if (playbackSlider.IsActive()) moveSlider();
     }
 
     private void CreateTwinItems(ExerciseData data)
@@ -69,7 +88,7 @@ public class UIManager : MonoBehaviour
         BindPerform(patientGO, data.title);
         BindSend(patientGO, data.title);
 
-      var playBtn = FindButton(doctorGO.transform, "Play button");
+        var playBtn = FindButton(doctorGO.transform, "Play button");
         if (playBtn != null)
             playBtn.onClick.AddListener(() =>
             {
@@ -189,11 +208,6 @@ public class UIManager : MonoBehaviour
         return null;
     }
 
-    private void SaveExercisesToJson()
-    {
-        string json = JsonUtility.ToJson(exerciseList, true);
-        File.WriteAllText(jsonPath, json);
-    }
 
     private static readonly ExerciseData[] defaultSamples =
     {
@@ -209,39 +223,36 @@ public class UIManager : MonoBehaviour
         }
     };
 
-    private void LoadExercisesFromJson()
+    private void LoadExercisesFromFiles(bool isPatient)
     {
-        if (File.Exists(jsonPath))
-        {
-            string json = File.ReadAllText(jsonPath);
-            exerciseList = JsonUtility.FromJson<ExerciseList>(json) ?? new ExerciseList();
-            //exerciseList = JsonUtility.FromJson<ExerciseList>(File.ReadAllText(jsonPath));
-        }
-        else
-        {
-            exerciseList = new ExerciseList();
-        }
-        foreach (var sample in defaultSamples)
-        {
-            bool exists = exerciseList.exercises.Exists(e => e.title == sample.title);
-            if (!exists)
-            {
-                exerciseList.exercises.Insert(0, sample);
-            }
-        }
-        SaveExercisesToJson();
+        // Use MovementRecordingsManager to retrieve the exercise list
+        exerciseList = movementRecordingsManager.MakeExerciseListFromFiles(isPatient);
+        RenderAllExercises(); // Render the exercises after loading
+    }
+
+    private void SaveExercisesToJson()
+    {
+        // This method is no longer needed since saving is automatic during recording
+        Debug.LogWarning("SaveExercisesToJson is deprecated. Saving is handled automatically during recording.");
     }
 
     private void RenderAllExercises()
     {
-        foreach (var ex in exerciseList.exercises)
-            CreateTwinItems(ex);
+        // Clear existing items
+        foreach (Transform child in contentParentDoctor) Destroy(child.gameObject);
+        foreach (Transform child in contentParentPatient) Destroy(child.gameObject);
+
+        foreach (var exercise in exerciseList.exercises)
+        {
+            CreateTwinItems(exercise);
+        }
     }
 
-    // public ui funcgitons
-
+    // add new exercise into ui manager (not added to files here)
     public void OnContinueAddExercise()
     {
+        //LoadExercisesFromFiles(isPatient: false);
+
         string title = titleInput.text.Trim();
         string description = descriptionInput.text.Trim();
         if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(description))
@@ -251,80 +262,221 @@ public class UIManager : MonoBehaviour
         }
 
         var data = new ExerciseData { title = title, description = description };
-        exerciseList.exercises.Add(data);
-        SaveExercisesToJson();
-
         CreateTwinItems(data);
+
         titleInput.text = "";
         descriptionInput.text = "";
+
         AppState.CurrentUser = UserType.Doctor;
         userSelector.ShowOnly(userSelector.recordDoctorPanel);
         currentExerciseTitle = title; // Set current exercise title for further actions
         Debug.LogWarning($"New exercise added: {currentExerciseTitle}");
+
     }
+
+    #region old json loading
+    //private void SaveExercisesToJson()
+    //{
+    //    string json = JsonUtility.ToJson(exerciseList, true);
+    //    File.WriteAllText(jsonPath, json);
+    //}
+
+    //private void LoadExercisesFromJson()
+    //{
+    //    if (File.Exists(jsonPath))
+    //    {
+    //        string json = File.ReadAllText(jsonPath);
+    //        exerciseList = JsonUtility.FromJson<ExerciseList>(json) ?? new ExerciseList();
+    //        //exerciseList = JsonUtility.FromJson<ExerciseList>(File.ReadAllText(jsonPath));
+    //    }
+    //    else
+    //    {
+    //        exerciseList = new ExerciseList();
+    //    }
+    //    foreach (var sample in defaultSamples)
+    //    {
+    //        bool exists = exerciseList.exercises.Exists(e => e.title == sample.title);
+    //        if (!exists)
+    //        {
+    //            exerciseList.exercises.Insert(0, sample);
+    //        }
+    //    }
+    //    SaveExercisesToJson();
+    //}
+
+    //private void RenderAllExercises()
+    //{
+    //    foreach (var ex in exerciseList.exercises)
+    //        CreateTwinItems(ex);
+    //}
+
+    //// public ui funcgitons
+
+    //public void OnContinueAddExercise()
+    //{
+    //    string title = titleInput.text.Trim();
+    //    string description = descriptionInput.text.Trim();
+    //    if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(description))
+    //    {
+    //        Debug.LogWarning("Please input Title and Description！");
+    //        return;
+    //    }
+
+    //    var data = new ExerciseData { title = title, description = description };
+    //    exerciseList.exercises.Add(data);
+    //    SaveExercisesToJson();
+
+    //    CreateTwinItems(data);
+    //    titleInput.text = "";
+    //    descriptionInput.text = "";
+    //    AppState.CurrentUser = UserType.Doctor;
+    //    userSelector.ShowOnly(userSelector.recordDoctorPanel);
+    //    currentExerciseTitle = title; // Set current exercise title for further actions
+    //    Debug.LogWarning($"New exercise added: {currentExerciseTitle}");
+    //}
+
+
+    #endregion
+
+    public void moveSlider()
+    {
+        if(playbackSlider != null || !playbackSlider.IsActive())
+        {
+            // find active slider in the scene
+            playbackSlider = FindObjectOfType<Slider>();
+            maxPlaybackTime = movementRecordingsManager.GetMaxPlaybackTime(patientString + currentExerciseTitle);
+        }
+        if (playbackSlider != null)
+        {
+            playbackTime = jointPlayback.playbackTime;
+            playbackSlider.value = playbackTime;
+        }
+        else
+        {
+            Debug.LogError("Playback slider not found in the scene.");
+        }
+    }
+    public void OnSliderValueChanged()
+    {
+        jointPlayback.Seek(playbackSlider.value); 
+    }
+
+
+    #region ui functions simple
+    // movements
+    public void onStartPlay(bool isExerciseByPatient) 
+    {
+        isPatient = isExerciseByPatient;
+        patientString = isPatient ? "Patient_" : "Doctor_";
+
+        jointPlayback.SetRecordingToPlay(patientString + currentExerciseTitle);
+        jointPlayback.Play();
+
+        moveSlider();
+    }
+    public void onStopPlay() => jointPlayback.Stop();
+    public void onPausePlay() => jointPlayback.Pause();
+
+    public void onStartRecord(bool isExerciseByPatient) 
+    {
+        isPatient = isExerciseByPatient;
+        jointTracker.NewExercise(currentExerciseTitle, isPatient);
+        jointTracker.StartRecording();
+    }
+    public void onStopRecord() => jointTracker.StopRecording();
+
+    //feedback
+    public void onStartRecordFeedback() 
+    {
+        feedbackDrawing.SetExerciseName(currentExerciseTitle, playbackTime.ToString());
+        feedbackDrawing.setRecordingOn();
+
+        recordAudio.StartRecording();
+    }
+    public void onStopRecordFeedback()
+    {
+        feedbackDrawing.setRecordingOff();
+
+        recordAudio.StopRecording(currentExerciseTitle, playbackTime.ToString());
+    }
+
+    public void onStartPlayFeedback(string exerciseName, string timestamp) // already bound in movementRecordingsManager.cs
+    { 
+        feedbackDrawing.SetExerciseName(exerciseName, timestamp);
+        feedbackDrawing.startPlayback();
+
+        recordAudio.LoadRecording(exerciseName, timestamp);
+        recordAudio.StartPlayback();
+    }
+    public void onStopPlayFeedback()
+    {
+        feedbackDrawing.StopPlayback();
+
+        recordAudio.StopPlayback();
+    }
+    #endregion
+
+    #region old ui connection functions
 
     public void onDoctorExercisePlay() {
         Debug.LogWarning($"Doctor plays his own exercise: {currentExerciseTitle} " );
-        jointPlayback.SetRecordingToPlay("Doctor_"+currentExerciseTitle); // Set the exercise to play
-        jointPlayback.Play(); // Start playback of the doctor's exercise
-
+        onStartPlay(false);
     }
 
 
     public void onDoctorExerciseStop()
     {
         Debug.LogWarning($"Doctor Stops his own exercise playing {currentExerciseTitle}");
-        jointPlayback.Stop(); // Stop playback of the doctor's exercise
-
+        onStopPlay();
     }
 
     public void onDoctorExercisePause()
     {
         Debug.LogWarning($"Doctor pauses his own exercise playing {currentExerciseTitle}");
-        jointPlayback.Pause(); // Pause playback of the doctor's exercise
+        onPausePlay();
     }
 
     public void onDoctorStartRecording()
     {
         Debug.LogWarning($"Doctor starts recording exercise: {currentExerciseTitle}");
-        jointTracker.NewExercise(currentExerciseTitle, false); // false indicates it's a doctor's exercise
-        jointTracker.StartRecording();
+        onStartRecord(false);
     }
 
     public void onDoctorStopRecording()
     {
         Debug.LogWarning($"Doctor stops recording exercise: {currentExerciseTitle} and goes to preview panel");
-        jointTracker.StopRecording(); // Stop the recording
+        onStopRecord();
     }
 
     public void onDoctorRedoExercise()
     { //do we even need this? we go back to recording panel again and it works any ways
         Debug.LogWarning($"Doctor redoes the exercise recording {currentExerciseTitle}");
-        jointTracker.NewExercise(currentExerciseTitle, false); // false indicates it's a doctor's exercise
-        jointTracker.StartRecording(); // Start a new recording session
+        onStartRecord(false);
     }
 
 
     //Doctor feedback section now
 
-    public void onDoctorStartFeedback(string feedbackID)
+    public void onDoctorStartFeedback()
     {
-        Debug.LogWarning($"Doctor starts giving one feedback {feedbackID}");
+        Debug.LogWarning($"Doctor starts giving one feedback");
+        onStartRecordFeedback();
     }
-    
-    public void onDoctorStopFeedback(string feedbackID)
+    public void onDoctorStopFeedback()
     {
-        Debug.LogWarning($"Doctor stops giving that feedback {feedbackID}");
+        Debug.LogWarning($"Doctor stops giving that feedback ");
+        onStopRecordFeedback();
+
     }
 
-    public void onDoctorFinishAllFeedback()
+    public void onDoctorFinishAllFeedback() //TODO what is this
     {
         Debug.LogWarning($"Doctor finishes all feedback for exercise {currentExerciseTitle}");
     }
 
 
     //not in use
-    public void onDoctorStartsAllFeedback()
+    public void onDoctorStartsAllFeedback() //TODO what is this
     {
         Debug.LogWarning($"Doctor starts giving feedback for exercise {currentExerciseTitle}");
     }
@@ -332,14 +484,13 @@ public class UIManager : MonoBehaviour
     public void onDoctorPlayPatientsExercise()
     {
         Debug.LogWarning($"Doctor plays patient's exercise: {currentExerciseTitle} for review and feedback");
-        jointPlayback.SetRecordingToPlay("Patient_" + currentExerciseTitle); // Set the exercise to play
-        jointPlayback.Stop();
+        onStartPlay(true); 
     }
 
     public void onDoctorStopPatientExercise()
     {
         Debug.LogWarning($"Doctor stops patient's exercise playback: {currentExerciseTitle}");
-        jointPlayback.Stop();
+        onStopPlay();
     }
 
     //Patient panel
@@ -347,46 +498,43 @@ public class UIManager : MonoBehaviour
    public void onPatientPlaysDoctorsExercise()
     {
         Debug.LogWarning($"Patient plays doctor's exercise: {currentExerciseTitle} for practice");
-        jointPlayback.SetRecordingToPlay("Doctor_" + currentExerciseTitle); // Set the exercise to play
-        jointPlayback.Play();
+        onStartPlay(false);
     }
 
     public void onPatientStopsDoctorsExercise()
     {
         Debug.LogWarning($"Patient stops doctor's exercise playback: {currentExerciseTitle}");
-        jointPlayback.Stop();
+        onStopPlay();
     }
 
     public void onPatientPausesDoctorsExercise()
     {
         Debug.LogWarning($"Patient pauses doctor's exercise playback: {currentExerciseTitle}");
-        jointPlayback.Pause(); // Pause playback of the doctor's exercise
+        onPausePlay();
     }
 
     public void onPatientStartRecordingPerform()
     {
         Debug.LogWarning($"Patient starts movement for this {currentExerciseTitle}");
-        jointTracker.NewExercise(currentExerciseTitle, true);
-        jointTracker.StartRecording();
+        onStartRecord(true);
     }
 
     public void onPatientStopRecordingPerform()
     {
         Debug.LogWarning($"Patient stops movement for this {currentExerciseTitle}");
-        jointTracker.StopRecording();
+        onStopRecord();
     }
 
     public void onPatientPlayPreviewExercise()
     {
         Debug.LogWarning($"Patient previews/playback his own exercise before sending it to doctor {currentExerciseTitle}");
-        jointPlayback.SetRecordingToPlay("Patient_" + currentExerciseTitle); // Set the exercise to play
-        jointPlayback.Play();
+        onStartPlay(true); 
     }
 
     public void onPatientStopPreviewExercise()
     {
         Debug.LogWarning($"Patient stops his own exercise before sending it to doctor {currentExerciseTitle}");
-        jointPlayback.Stop();
+        onStopPlay();
     }
 
     public void onPatientPausePreviewExercise()
@@ -398,25 +546,26 @@ public class UIManager : MonoBehaviour
     public void onPatientRedoExercise()
     {
         Debug.LogWarning($"Patient redoes the exercise recording {currentExerciseTitle}");
-        jointTracker.NewExercise(currentExerciseTitle, true);
-        jointTracker.StartRecording();
+        onStartRecord(true); 
     }
 
 
     //feedback section
 
-    public void onPatientPlayFeedback(string exerciseTitle, string timestamp) 
-   
+    public void onPatientPlayFeedback(string exerciseTitle, string timestamp) // auto added through movementRecordingsManager.cs
+
     {
-        Debug.LogWarning($"Feedback Playback for  {exerciseTitle} open on timestamp {timestamp}");
-        feedbackDrawing.SetExerciseName(exerciseTitle, timestamp);
-        feedbackDrawing.startPlayback();
+        //Debug.LogWarning($"Feedback Playback for  {exerciseTitle} open on timestamp {timestamp}");
+        //onStartPlayFeedback(exerciseTitle, timestamp);
+        Debug.LogError("method should not be called like this, call onStartPlayFeedback instead");
     }
    
-    public void onPatientStopFeedback(string exerciseTitle, string timestamp)
+    public void onPatientStopFeedback(string exerciseTitle, string timestamp) //TODO no stop button
     {
         Debug.LogWarning($"Feedback Playback for  {exerciseTitle} closed on timestamp {timestamp}");
         feedbackDrawing.StopPlayback();
     }
+
+    #endregion
 
 }

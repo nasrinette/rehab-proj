@@ -34,6 +34,7 @@ public class JointTracker : MonoBehaviour
         timeStamp += Time.fixedDeltaTime;
     }
 
+
     private void InitializeCsvFile()
     {
         string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "MovementRecordings");
@@ -50,11 +51,14 @@ public class JointTracker : MonoBehaviour
 
     private IEnumerator AssignJointsAfterDelay()
     {
-        yield return new WaitForSeconds(10f);
-
         if (head == null) head = entityGO.Find("Joint Head");
         if (leftHand == null) leftHand = entityGO.Find("Joint LeftHandWrist");
         if (rightHand == null) rightHand = entityGO.Find("Joint RightHandWrist");
+
+        yield return new WaitForSeconds(2f);
+
+        if (head == null || leftHand == null || rightHand == null) AssignJointsAfterDelay();
+
     }
 
     private void WriteCsvHeader()
@@ -79,15 +83,18 @@ public class JointTracker : MonoBehaviour
     {
         // Wait until joints are assigned
         while (head == null || leftHand == null || rightHand == null)
+        {
+            AssignJointsAfterDelay();
             yield return null;
+        }
 
         Debug.Log("Starting joint logging...");
 
         while (true)
         {
-            Vector3 headRot = head.rotation.eulerAngles;
-            Vector3 leftHandRot = leftHand.rotation.eulerAngles;
-            Vector3 rightHandRot = rightHand.rotation.eulerAngles;
+            Vector3 headRot = head.localRotation.eulerAngles;
+            Vector3 leftHandRot = leftHand.localRotation.eulerAngles;
+            Vector3 rightHandRot = rightHand.localRotation.eulerAngles;
 
             var line = string.Format("{0}," +
                 "{1},{2},{3},{4},{5},{6}," +

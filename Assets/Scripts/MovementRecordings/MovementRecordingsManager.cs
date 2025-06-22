@@ -18,7 +18,7 @@ public class MovementRecordingsManager : MonoBehaviour
     public GameObject feedbackButtonPrefab;
     public GameObject feedbackIndicatorPrefab;
     public Transform handleSlideArea;
-    public UIManager UImanager;
+    public UIManager UiManager;
     private void Start()
     {
         //List<string> tempTimeStamps = MakeFeedbackListFromFiles("Patient_de").timestamps;
@@ -89,14 +89,14 @@ public class MovementRecordingsManager : MonoBehaviour
             GameObject newButton = Instantiate(feedbackButtonPrefab, content);
             newButton.name = "FeedbackButton_" + timestamp;
             newButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = timestamp;
-            newButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => UImanager.onPatientPlayFeedback(exerciseName, timestamp));
+            newButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => UiManager.onStartPlayFeedback(exerciseName, timestamp));
 
             GameObject feedbackIndicator = Instantiate(feedbackIndicatorPrefab, handleSlideArea);
-            feedbackIndicator.GetComponent<RectTransform>().anchoredPosition = new Vector2(float.Parse(timestamp) * handleSlideArea.transform.parent.GetComponent<RectTransform>().rect.width / getFeedbackRecordingMaxTime(exerciseName), 0);
+            feedbackIndicator.GetComponent<RectTransform>().anchoredPosition = new Vector2(float.Parse(timestamp) * handleSlideArea.transform.parent.GetComponent<RectTransform>().rect.width / GetMaxPlaybackTime(exerciseName), 0);
         }
     }
 
-    public float getFeedbackRecordingMaxTime(string exerciseName)
+    public float GetMaxPlaybackTime(string exerciseName)
     {
         string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "MovementRecordings");
         string files = Directory.GetFiles(folderPath, exerciseName + "*.csv")[0];

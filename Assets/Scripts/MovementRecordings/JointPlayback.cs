@@ -28,7 +28,7 @@ public class JointPlayback : MonoBehaviour
     }
 
     private List<Frame> frames = new List<Frame>();
-    private float playbackTime = 0f;
+    public float playbackTime = 0f;
     public bool playOnStart = true;
     private bool isPlaying = false;
 
@@ -80,14 +80,14 @@ public class JointPlayback : MonoBehaviour
             int idx = 0;
             f.time = float.Parse(cols[idx++]);
             f.headPos = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
-            f.headRot = Vector3.zero; idx++; idx++; idx++;  //
-            //f.headRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
+            //f.headRot = Vector3.zero; idx++; idx++; idx++;
+            f.headRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             f.leftHandPos = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
-            f.leftHandRot = Vector3.zero; idx++; idx++; idx++;
-            //f.leftHandRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
+            //f.leftHandRot = Vector3.zero; idx++; idx++; idx++;
+            f.leftHandRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             f.rightHandPos = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
-            f.rightHandRot = Vector3.zero; idx++; idx++; idx++; 
-            //f.rightHandRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
+            //f.rightHandRot = Vector3.zero; idx++; idx++; idx++; 
+            f.rightHandRot = new Vector3(float.Parse(cols[idx++]), float.Parse(cols[idx++]), float.Parse(cols[idx++]));
             frames.Add(f);
         }
     }
@@ -114,17 +114,17 @@ public class JointPlayback : MonoBehaviour
         if (head != null)
         {
             head.localPosition = f.headPos;
-            head.rotation = Quaternion.Euler(f.headRot);
+            head.localRotation = Quaternion.Euler(f.headRot);
         }
         if (leftHand != null)
         {
             leftHand.localPosition = f.leftHandPos;
-            leftHand.rotation = Quaternion.Euler(f.leftHandRot);
+            leftHand.localRotation = Quaternion.Euler(f.leftHandRot);
         }
         if (rightHand != null)
         {
             rightHand.localPosition = f.rightHandPos;
-            rightHand.rotation = Quaternion.Euler(f.rightHandRot);
+            rightHand.localRotation = Quaternion.Euler(f.rightHandRot);
         }
     }
 
@@ -142,4 +142,6 @@ public class JointPlayback : MonoBehaviour
 
         entityAvatarRef.SetInputManager(manual);
     }
+
+
 }
