@@ -102,8 +102,10 @@ public class UIManager : MonoBehaviour
 
         var fbBtn = FindButton(doctorGO.transform, "Feedback button");
         if (fbBtn != null)
-           { fbBtn.onClick.AddListener(() => SendFeedbackToPatient(data.title, fbBtn));
-            userSelector.ShowOnly(userSelector.drawForFeedbackDoctorPanel);}
+        {
+            fbBtn.onClick.AddListener(() => SendFeedbackToPatient(data.title, fbBtn));
+            // userSelector.ShowOnly(userSelector.drawForFeedbackDoctorPanel);
+        }
         else
         {
             Debug.LogWarning("Feedback button not found in doctor exercise prefab.");
@@ -160,9 +162,6 @@ public class UIManager : MonoBehaviour
         if (btn != null)
         {
             btn.onClick.AddListener(() => SendFeedbackToPatient(title, btn));
-            userSelector.ShowOnly(userSelector.drawForFeedbackDoctorPanel);
-            currentExerciseTitle = title; // Set current exercise title for further actions
-            Debug.LogWarning($"Binding feedback for exercise: {currentExerciseTitle}");
         }
     }
 
@@ -195,11 +194,15 @@ public class UIManager : MonoBehaviour
             BindPlayFeedbackPatient(perfGO, title); // bind play feedback button
             patientFbDict[title] = perfGO;
         }
-
+        userSelector.ShowOnly(userSelector.drawForFeedbackDoctorPanel);
+        currentExerciseTitle = title; 
+        Debug.LogWarning($"Giving feedback for exercise: {currentExerciseTitle}");
         fbBtn.interactable = false;
         var txt = fbBtn.GetComponentInChildren<TMP_Text>();
         if (txt) txt.text = "Feedback Sent";
     }
+
+
 
     private void BindRemoveFeedbackPatient(GameObject go, string titleKey)
     {
@@ -238,16 +241,16 @@ public class UIManager : MonoBehaviour
 
     private static readonly ExerciseData[] defaultSamples =
     {
-        new ExerciseData
-        {
-            title = "Bicep curl",
-            description = "Bend your elbow to bring your hand toward your shoulder."
-        },
-        new ExerciseData
-        {
-            title = "Shoulder raise",
-            description = "Raise your arms straight to shoulder height."
-        }
+        // new ExerciseData
+        // {
+        //     title = "Bicep curl",
+        //     description = "Bend your elbow to bring your hand toward your shoulder."
+        // },
+        // new ExerciseData
+        // {
+        //     title = "Shoulder raise",
+        //     description = "Raise your arms straight to shoulder height."
+        // }
     };
 
     private void LoadExercisesFromFiles(bool isPatient)
