@@ -391,11 +391,21 @@ public class UIManager : MonoBehaviour
         jointPlayback.Seek(playbackSlider.value); 
     }
 
+    public void removeAllFeedbackLines()
+    {
+        FindObjectsOfType<LineRenderer>().ToList();
+        foreach (var line in FindObjectsOfType<LineRenderer>())
+        {
+            if (line.gameObject.tag == "FeedbackLine") Destroy(line.gameObject);
+        }
+    }
 
     #region ui functions simple
     // movements
     public void onStartPlay(bool isExerciseByPatient) 
     {
+        removeAllFeedbackLines();
+
         onStopPlay();
         onStopRecord();
         onStopPlayFeedback();
@@ -435,6 +445,7 @@ public class UIManager : MonoBehaviour
     //feedback
     public void onStartRecordFeedback() 
     {
+        removeAllFeedbackLines();
         //onStopPlay();
         onPausePlay();
         onStopRecord();
@@ -449,12 +460,14 @@ public class UIManager : MonoBehaviour
     public void onStopRecordFeedback()
     {
         feedbackDrawing.setRecordingOff();
+        removeAllFeedbackLines();
 
         recordAudio.StopRecording(currentExerciseTitle, playbackTime.ToString());
     }
     public void onStartPlayFeedback(string exerciseName, string timestamp) // already bound in movementRecordingsManager.cs
     {
         //onStopPlay();
+        removeAllFeedbackLines();
 
         onStopRecord();
         onStopPlayFeedback();
@@ -472,6 +485,8 @@ public class UIManager : MonoBehaviour
     public void onStopPlayFeedback()
     {
         feedbackDrawing.StopPlayback();
+
+        removeAllFeedbackLines();
 
         recordAudio.StopPlayback();
     }
