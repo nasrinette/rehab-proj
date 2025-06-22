@@ -341,7 +341,7 @@ public class UIManager : MonoBehaviour
 
     public void moveSlider()
     {
-        if(playbackSlider != null || !playbackSlider.IsActive())
+        if(playbackSlider != null && playbackSlider.IsActive())
         {
             // find active slider in the scene
             playbackSlider = FindObjectOfType<Slider>();
@@ -369,6 +369,7 @@ public class UIManager : MonoBehaviour
     {
         isPatient = isExerciseByPatient;
         patientString = isPatient ? "Patient_" : "Doctor_";
+        if (currentExerciseTitle.Contains("Patient") || currentExerciseTitle.Contains("Doctor")) patientString = "";
 
         jointPlayback.SetRecordingToPlay(patientString + currentExerciseTitle);
         jointPlayback.Play();
