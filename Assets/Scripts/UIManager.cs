@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.IO;
+using System.Linq;
 
 [System.Serializable]
 public class ExerciseData
@@ -393,11 +394,26 @@ public class UIManager : MonoBehaviour
         jointPlayback.Seek(playbackSlider.value); 
     }
 
+    public void removeAllFeedbackLines()
+    {
+        FindObjectsOfType<LineRenderer>().ToList();
+        foreach (var line in FindObjectsOfType<LineRenderer>())
+        {
+            if (line.gameObject.tag == "FeedbackLine") Destroy(line.gameObject);
+        }
+    }
 
     #region ui functions simple
     // movements
     public void onStartPlay(bool isExerciseByPatient) 
     {
+        removeAllFeedbackLines();
+
+        onStopPlay();
+        onStopRecord();
+        onStopPlayFeedback();
+        onStopRecordFeedback();
+
         isPatient = isExerciseByPatient;
         patientString = isPatient ? "Patient_" : "Doctor_";
         if (currentExerciseTitle.Contains("Patient") || currentExerciseTitle.Contains("Doctor")) patientString = "";
@@ -412,7 +428,18 @@ public class UIManager : MonoBehaviour
 
     public void onStartRecord(bool isExerciseByPatient) 
     {
+        onStopPlay();
+        onStopRecord();
+        onStopPlayFeedback();
+        onStopRecordFeedback();
+
         isPatient = isExerciseByPatient;
+        if (currentExerciseTitle.Contains("Doctor") || currentExerciseTitle.Contains("Patient"))
+        {
+            var tempList = currentExerciseTitle.Split('_').ToList();
+            tempList.RemoveAt(0);
+            currentExerciseTitle = string.Join("_", tempList);
+        }
         jointTracker.NewExercise(currentExerciseTitle, isPatient);
         jointTracker.StartRecording();
     }
@@ -421,6 +448,13 @@ public class UIManager : MonoBehaviour
     //feedback
     public void onStartRecordFeedback() 
     {
+        removeAllFeedbackLines();
+        //onStopPlay();
+        onPausePlay();
+        onStopRecord();
+        onStopPlayFeedback();
+        onStopRecordFeedback();
+
         feedbackDrawing.SetExerciseName(currentExerciseTitle, playbackTime.ToString());
         feedbackDrawing.setRecordingOn();
 
@@ -429,12 +463,22 @@ public class UIManager : MonoBehaviour
     public void onStopRecordFeedback()
     {
         feedbackDrawing.setRecordingOff();
+        removeAllFeedbackLines();
 
         recordAudio.StopRecording(currentExerciseTitle, playbackTime.ToString());
     }
-
     public void onStartPlayFeedback(string exerciseName, string timestamp) // already bound in movementRecordingsManager.cs
-    { 
+    {
+        //onStopPlay();
+        removeAllFeedbackLines();
+
+        onStopRecord();
+        onStopPlayFeedback();
+        onStopRecordFeedback();
+
+        jointPlayback.Seek(float.Parse(timestamp));
+        onPausePlay();
+
         feedbackDrawing.SetExerciseName(exerciseName, timestamp);
         feedbackDrawing.startPlayback();
 
@@ -444,6 +488,8 @@ public class UIManager : MonoBehaviour
     public void onStopPlayFeedback()
     {
         feedbackDrawing.StopPlayback();
+
+        removeAllFeedbackLines();
 
         recordAudio.StopPlayback();
     }

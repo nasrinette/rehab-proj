@@ -57,6 +57,7 @@ public class FeedbackDrawing : MonoBehaviour
             linePrefab.endWidth = 0.02f;
             linePrefab.positionCount = 0;
         }
+        linePrefab.tag = ("FeedbackLineRenderer");
     }
 
     private void Update()
