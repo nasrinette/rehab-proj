@@ -28,7 +28,7 @@ public class JointPlayback : MonoBehaviour
     }
 
     private List<Frame> frames = new List<Frame>();
-    private float playbackTime = 0f;
+    public float playbackTime = 0f;
     public bool playOnStart = true;
     private bool isPlaying = false;
 
@@ -142,4 +142,6 @@ public class JointPlayback : MonoBehaviour
 
         entityAvatarRef.SetInputManager(manual);
     }
+
+
 }

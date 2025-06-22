@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using UnityEngine;
+using System;
 
 public class RecordAudio : MonoBehaviour
 {
@@ -12,14 +13,6 @@ public class RecordAudio : MonoBehaviour
     private string directoryPath = "Recordings";
     private float startTime;
     private float recordingLength;
-
-    private void Awake()
-    {
-        if (!Directory.Exists(directoryPath))
-        {
-            Directory.CreateDirectory(directoryPath);
-        }
-    }
 
     public void StartRecording()
     {
@@ -31,7 +24,7 @@ public class RecordAudio : MonoBehaviour
         startTime = Time.realtimeSinceStartup;
         Debug.Log("recording started on device: " + device);
     }
-    public void PlayRecording()
+    public void StartPlayback()
     {
         if (recordedClip != null)
         {
@@ -45,17 +38,29 @@ public class RecordAudio : MonoBehaviour
             Debug.LogWarning("No recording available to play.");
         }
     }
+    public void StopPlayback()
+    {
+        if (audioSource.isPlaying)
+        {
+            audioSource.Stop();
+            Debug.Log("Recording paused");
+        }
+        else
+        {
+            Debug.LogWarning("No recording is currently playing to pause.");
+        }
+    }
 
-    public void StopRecording()
+    public void StopRecording(string exerciseName, string timestamp)
     {
         Microphone.End(null);
         recordingLength = Time.realtimeSinceStartup - startTime;
         recordedClip = TrimClip(recordedClip, recordingLength);
-        SaveRecording();
+        SaveRecording(exerciseName, timestamp);
         Debug.Log("Recording stopped");
     }
 
-    public void SaveRecording()
+    public void SaveRecording(string exerciseName, string timestamp)
     {
         Debug.Log("Recording saving");
 
@@ -63,8 +68,7 @@ public class RecordAudio : MonoBehaviour
         {
             try
             {
-                string fullPath = Path.Combine(Application.persistentDataPath, "recording.wav");
-                WavUtility.Save(fullPath, recordedClip);
+                SaveWavFile(exerciseName, timestamp);
                 Debug.Log("Recording saved as " + filePath);
             }
             catch (System.Exception ex)
@@ -78,6 +82,24 @@ public class RecordAudio : MonoBehaviour
         }
     }
 
+    public void LoadRecording(string exerciseName, string timestamp)
+    {
+        Debug.Log("Loading recording");
+
+        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "AudioRecordings");
+        string fullPath = Path.Combine(folderPath, $"{exerciseName}_{timestamp}.wav");
+
+        if (File.Exists(fullPath))
+        {
+            recordedClip =  WavUtility.ToAudioClip(fullPath);
+            audioSource.clip = recordedClip;
+            Debug.Log("Recording loaded from " + fullPath);
+        }
+        else
+        {
+            Debug.LogError("Recording file not found: " + fullPath);
+        }
+    }
     private AudioClip TrimClip(AudioClip clip, float length)
     { 
         Debug.Log("trim starting");
@@ -90,6 +112,19 @@ public class RecordAudio : MonoBehaviour
         trimmedClip.SetData(data, 0);
         Debug.Log("trim stopped");
         return trimmedClip;
+    }
+
+
+    //util
+    public string SaveWavFile(string exerciseName, string timestamp)
+    {
+        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RehabProject", "AudioRecordings");
+        string fileName = $"{exerciseName}_{timestamp}.wav";
+
+        string filepath;
+        byte[] bytes = WavUtility.FromAudioClip(recordedClip, out filepath, true, folderPath, fileName);
+
+        return filepath;
     }
 
 }

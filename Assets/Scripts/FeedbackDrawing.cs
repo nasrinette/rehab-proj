@@ -20,6 +20,10 @@ public class FeedbackDrawing : MonoBehaviour
         }
     }
 
+
+    public Transform drawingTransform;
+    public Transform entityGO;
+
     public bool isDrawing = false;
     public bool isRecording = false;
     public LineRenderer linePrefab;
@@ -58,7 +62,7 @@ public class FeedbackDrawing : MonoBehaviour
     private void Update()
     {
         bool isHoldingTrigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.RTouch) > 0.1f;
-        isHoldingTrigger = isDrawing; // TODO FOR TESTING
+        //isHoldingTrigger = isDrawing;
         if (isDrawing && isHoldingTrigger)
         {
             Draw();
@@ -107,17 +111,23 @@ public class FeedbackDrawing : MonoBehaviour
 
     private void Draw()
     {
+        if (drawingTransform == null)
+        {
+            drawingTransform = entityGO.Find("Joint RightHandWrist");
+            return;
+        }
+
         if (currentLine == null)
         {
             // Instantiate from prefab GameObject properly
-            GameObject newLineGO = Instantiate(linePrefab.gameObject, transform.position, Quaternion.identity);
+            GameObject newLineGO = Instantiate(linePrefab.gameObject, drawingTransform.position, Quaternion.identity);
             currentLine = newLineGO.GetComponent<LineRenderer>();
             currentLine.positionCount = 0;
             allLines.Add(currentLine);
             currentLineId++;
         }
 
-        Vector3 currentPosition = transform.position;
+        Vector3 currentPosition = drawingTransform.position;
         if (currentLine.positionCount == 0 || currentLine.GetPosition(currentLine.positionCount - 1) != currentPosition)
         {
             currentLine.positionCount++;
@@ -267,19 +277,20 @@ public class FeedbackDrawing : MonoBehaviour
     {
         if (!isPlaying)
         {
+            PlaybackDrawing();
+
             if (playbackPoints.Count > 0)
             {
                 isPlaying = true;
                 playbackTimer = 0f;
                 playbackIndex = 0;
-                allLines.Clear();
+                //allLines.Clear();
                 Debug.Log("Playback started.");
             }
             else
             {
                 Debug.LogWarning("No points found in file.");
             }
-            PlaybackDrawing();
         }
         else
         {
