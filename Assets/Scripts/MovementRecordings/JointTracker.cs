@@ -51,13 +51,15 @@ public class JointTracker : MonoBehaviour
 
     private IEnumerator AssignJointsAfterDelay()
     {
-        if (head == null) head = entityGO.Find("Joint Head");
-        if (leftHand == null) leftHand = entityGO.Find("Joint LeftHandWrist");
-        if (rightHand == null) rightHand = entityGO.Find("Joint RightHandWrist");
+        while (head == null || leftHand == null || rightHand == null)
+        {
+            Debug.Log("June Waiting for joints to be assigned...");
+            if (head == null) head = entityGO.Find("Joint Head");
+            if (leftHand == null) leftHand = entityGO.Find("Joint LeftHandWrist");
+            if (rightHand == null) rightHand = entityGO.Find("Joint RightHandWrist");
+            yield return new WaitForSeconds(2f);
 
-        yield return new WaitForSeconds(2f);
-
-        if (head == null || leftHand == null || rightHand == null) AssignJointsAfterDelay();
+        }
 
     }
 

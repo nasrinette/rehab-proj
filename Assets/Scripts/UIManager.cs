@@ -71,6 +71,8 @@ public class UIManager : MonoBehaviour
     private void Update()
     {
         patientString = isPatient ? "Patient_" : "Doctor_";
+        if (currentExerciseTitle.Contains("Patient") || currentExerciseTitle.Contains("Doctor")) patientString = "";
+
         if (playbackSlider!= null && playbackSlider.IsActive()) moveSlider();
     }
 
@@ -99,7 +101,12 @@ public class UIManager : MonoBehaviour
 
         var fbBtn = FindButton(doctorGO.transform, "Feedback button");
         if (fbBtn != null)
-            fbBtn.onClick.AddListener(() => SendFeedbackToPatient(data.title, fbBtn));
+           { fbBtn.onClick.AddListener(() => SendFeedbackToPatient(data.title, fbBtn));
+            userSelector.ShowOnly(userSelector.drawForFeedbackDoctorPanel);}
+        else
+        {
+            Debug.LogWarning("Feedback button not found in doctor exercise prefab.");
+        }
     }
 
     private void RemoveByTitle(string title)
@@ -150,7 +157,12 @@ public class UIManager : MonoBehaviour
     {
         var btn = FindButton(go.transform, "Feedback button");
         if (btn != null)
+        {
             btn.onClick.AddListener(() => SendFeedbackToPatient(title, btn));
+            userSelector.ShowOnly(userSelector.drawForFeedbackDoctorPanel);
+            currentExerciseTitle = title; // Set current exercise title for further actions
+            Debug.LogWarning($"Binding feedback for exercise: {currentExerciseTitle}");
+        }
     }
 
     private void SendExerciseToDoctor(string title, Button sendBtn)
@@ -179,7 +191,7 @@ public class UIManager : MonoBehaviour
             InitItemUI(perfGO, exerciseList.exercises.Find(e => e.title == title));
 
             BindRemoveFeedbackPatient(perfGO, title); // only remove on Feedback/Patient Panel
-
+            BindPlayFeedbackPatient(perfGO, title); // bind play feedback button
             patientFbDict[title] = perfGO;
         }
 
@@ -197,6 +209,19 @@ public class UIManager : MonoBehaviour
         {
             patientFbDict.Remove(titleKey);
             Destroy(go);
+        });
+    }
+    private void BindPlayFeedbackPatient(GameObject go, string titleKey)
+    {
+        var btn = FindButton(go.transform, "Play button");
+        if (btn == null) return;
+
+        btn.onClick.AddListener(() =>
+        {
+           Debug.LogWarning($"Playing feedback for exercise: {titleKey}");
+            currentExerciseTitle = titleKey; 
+            userSelector.ShowOnly(userSelector.playFeedBackPatientPanel);
+            movementRecordingsManager.generateFeedBackUI(contentPlayFeedback, titleKey); // regenerate feedback UI after stopping playback
         });
     }
 
@@ -341,11 +366,14 @@ public class UIManager : MonoBehaviour
 
     public void moveSlider()
     {
-        if(playbackSlider != null && playbackSlider.IsActive())
+        playbackSlider = FindObjectOfType<Slider>();
+
+        if (playbackSlider != null && playbackSlider.IsActive())
         {
             // find active slider in the scene
             playbackSlider = FindObjectOfType<Slider>();
             maxPlaybackTime = movementRecordingsManager.GetMaxPlaybackTime(patientString + currentExerciseTitle);
+            playbackSlider.maxValue = maxPlaybackTime;
         }
         if (playbackSlider != null)
         {

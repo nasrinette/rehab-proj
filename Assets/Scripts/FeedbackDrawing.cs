@@ -53,8 +53,8 @@ public class FeedbackDrawing : MonoBehaviour
             GameObject lineGO = new GameObject("LineRenderer");
             linePrefab = lineGO.AddComponent<LineRenderer>();
             linePrefab.material = new Material(Shader.Find("Sprites/Default"));
-            linePrefab.startWidth = 0.1f;
-            linePrefab.endWidth = 0.1f;
+            linePrefab.startWidth = 0.02f;
+            linePrefab.endWidth = 0.02f;
             linePrefab.positionCount = 0;
         }
     }
@@ -127,7 +127,7 @@ public class FeedbackDrawing : MonoBehaviour
             currentLineId++;
         }
 
-        Vector3 currentPosition = drawingTransform.position;
+        Vector3 currentPosition = drawingTransform.position + new Vector3(-0.142f, -0.0289f, -0.0160f);
         if (currentLine.positionCount == 0 || currentLine.GetPosition(currentLine.positionCount - 1) != currentPosition)
         {
             currentLine.positionCount++;
