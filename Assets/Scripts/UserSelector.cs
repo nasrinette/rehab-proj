@@ -96,6 +96,7 @@ public class UserSelector : MonoBehaviour
     }
 
     public void OnBackToDoctor() => ShowOnly(doctorPanel);
+    public void OnBackToPatient() => ShowOnly(patientPanel);
     public void OnDoctorExercises() => ShowOnly(exercisesDoctorPanel);
     public void OnDoctorFeedback() => ShowOnly(feedbackDoctorPanel);
     public void OnDoctorPlay() => ShowOnly(playExerciseDoctorPanel);

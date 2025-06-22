@@ -24,12 +24,11 @@ public class UIManager : MonoBehaviour
     public GameObject doctorExercisePrefab;
     public GameObject patientExercisePrefab;
     public GameObject doctorFeedbackPrefab;
-    public GameObject patientPerformedPrefab;
+    public GameObject patientFeedbackPrefab;
     public Transform contentFeedbackDoctor;
     public Transform contentFeedbackPatient;
     public Transform contentParentDoctor;
     public Transform contentParentPatient;
-    public Transform contentFeedback;
     public TMP_InputField titleInput;
     public TMP_InputField descriptionInput;
 
@@ -78,7 +77,7 @@ public class UIManager : MonoBehaviour
                 userSelector.ShowOnly(userSelector.playExerciseDoctorPanel);
             });
 
-        var fbBtn = FindButton(doctorGO.transform, "Give Feedback button");
+        var fbBtn = FindButton(doctorGO.transform, "Feedback button");
         if (fbBtn != null)
             fbBtn.onClick.AddListener(() => SendFeedbackToPatient(data.title, fbBtn));
     }
@@ -134,14 +133,9 @@ public class UIManager : MonoBehaviour
             btn.onClick.AddListener(() => SendFeedbackToPatient(title, btn));
     }
 
-    private void BindPerformFeedbackPatient(GameObject go, string title)
-    {
-        // Patient 侧“Performed”条目如果还有播放按钮可在此绑定
-    }
-
     private void SendExerciseToDoctor(string title, Button sendBtn)
     {
-        // 克隆到 Doctor Feedback 列表
+        // Doctor feedback content synchronized
         if (!doctorFbDict.ContainsKey(title))
         {
             var fbGO = Instantiate(doctorFeedbackPrefab, contentFeedbackDoctor);
@@ -150,19 +144,22 @@ public class UIManager : MonoBehaviour
             doctorFbDict[title] = fbGO;
         }
 
-        // 修改 Patient 侧条目外观
+        // Send to doctor -> Sent
         sendBtn.interactable = false;
         var txt = sendBtn.GetComponentInChildren<TMP_Text>();
-        if (txt) txt.text = "Performed";
+        if (txt) txt.text = "Sent";
     }
 
-    /* ---------- 6. Feedback 逻辑 ---------- */
     private void SendFeedbackToPatient(string title, Button fbBtn)
     {
+        // Patient feedback content synchronized
         if (!patientFbDict.ContainsKey(title))
         {
-            var perfGO = Instantiate(patientPerformedPrefab, contentFeedbackPatient);
+            var perfGO = Instantiate(patientFeedbackPrefab, contentFeedbackPatient);
             InitItemUI(perfGO, exerciseList.exercises.Find(e => e.title == title));
+
+            BindRemoveFeedbackPatient(perfGO, title); // only remove on Feedback/Patient Panel
+
             patientFbDict[title] = perfGO;
         }
 
@@ -170,6 +167,19 @@ public class UIManager : MonoBehaviour
         var txt = fbBtn.GetComponentInChildren<TMP_Text>();
         if (txt) txt.text = "Feedback Sent";
     }
+
+    private void BindRemoveFeedbackPatient(GameObject go, string titleKey)
+    {
+        var btn = FindButton(go.transform, "Remove patient button");
+        if (btn == null) return;
+
+        btn.onClick.AddListener(() =>
+        {
+            patientFbDict.Remove(titleKey);
+            Destroy(go);
+        });
+    }
+
 
     private Button FindButton(Transform root, string btnName)
     {
@@ -279,17 +289,13 @@ public class UIManager : MonoBehaviour
         Debug.LogWarning($"Doctor starts recording exercise: {currentExerciseTitle}");
         jointTracker.NewExercise(currentExerciseTitle, false); // false indicates it's a doctor's exercise
         jointTracker.StartRecording();
-
-
     }
 
     public void onDoctorStopRecording()
     {
         Debug.LogWarning($"Doctor stops recording exercise: {currentExerciseTitle} and goes to preview panel");
         jointTracker.StopRecording(); // Stop the recording
-
     }
-
 
     public void onDoctorRedoExercise()
     { //do we even need this? we go back to recording panel again and it works any ways
@@ -304,12 +310,11 @@ public class UIManager : MonoBehaviour
     public void onDoctorStartFeedback(string feedbackID)
     {
         Debug.LogWarning($"Doctor starts giving one feedback {feedbackID}");
-        
     }
+    
     public void onDoctorStopFeedback(string feedbackID)
     {
         Debug.LogWarning($"Doctor stops giving that feedback {feedbackID}");
-       
     }
 
     public void onDoctorFinishAllFeedback()
@@ -328,9 +333,9 @@ public class UIManager : MonoBehaviour
     {
         Debug.LogWarning($"Doctor plays patient's exercise: {currentExerciseTitle} for review and feedback");
         jointPlayback.SetRecordingToPlay("Patient_" + currentExerciseTitle); // Set the exercise to play
-
         jointPlayback.Stop();
     }
+
     public void onDoctorStopPatientExercise()
     {
         Debug.LogWarning($"Doctor stops patient's exercise playback: {currentExerciseTitle}");
@@ -343,26 +348,28 @@ public class UIManager : MonoBehaviour
     {
         Debug.LogWarning($"Patient plays doctor's exercise: {currentExerciseTitle} for practice");
         jointPlayback.SetRecordingToPlay("Doctor_" + currentExerciseTitle); // Set the exercise to play
-
         jointPlayback.Play();
     }
+
     public void onPatientStopsDoctorsExercise()
     {
         Debug.LogWarning($"Patient stops doctor's exercise playback: {currentExerciseTitle}");
         jointPlayback.Stop();
     }
+
     public void onPatientPausesDoctorsExercise()
     {
         Debug.LogWarning($"Patient pauses doctor's exercise playback: {currentExerciseTitle}");
         jointPlayback.Pause(); // Pause playback of the doctor's exercise
-
     }
+
     public void onPatientStartRecordingPerform()
     {
         Debug.LogWarning($"Patient starts movement for this {currentExerciseTitle}");
         jointTracker.NewExercise(currentExerciseTitle, true);
         jointTracker.StartRecording();
     }
+
     public void onPatientStopRecordingPerform()
     {
         Debug.LogWarning($"Patient stops movement for this {currentExerciseTitle}");
@@ -373,20 +380,21 @@ public class UIManager : MonoBehaviour
     {
         Debug.LogWarning($"Patient previews/playback his own exercise before sending it to doctor {currentExerciseTitle}");
         jointPlayback.SetRecordingToPlay("Patient_" + currentExerciseTitle); // Set the exercise to play
-
         jointPlayback.Play();
-
     }
+
     public void onPatientStopPreviewExercise()
     {
         Debug.LogWarning($"Patient stops his own exercise before sending it to doctor {currentExerciseTitle}");
         jointPlayback.Stop();
     }
+
     public void onPatientPausePreviewExercise()
     {
         Debug.LogWarning($"Patient pauses his own exercise before sending it to doctor {currentExerciseTitle}");
         jointPlayback.Pause(); // Pause playback of the patient's exercise
     }
+
     public void onPatientRedoExercise()
     {
         Debug.LogWarning($"Patient redoes the exercise recording {currentExerciseTitle}");
@@ -410,11 +418,5 @@ public class UIManager : MonoBehaviour
         Debug.LogWarning($"Feedback Playback for  {exerciseTitle} closed on timestamp {timestamp}");
         feedbackDrawing.StopPlayback();
     }
-
-
-    // public void RecordVideo() { }
-    // public void PauseVideo() { }
-    // public void StopVideo() { }
-    // public void SaveVideo() { }
 
 }
