@@ -79,6 +79,7 @@ public class UIManager : MonoBehaviour
 
     private void CreateTwinItems(ExerciseData data)
     {
+        Debug.LogWarning($"Creating twin items for exercise: {data.title}");
         var doctorGO = Instantiate(doctorExercisePrefab, contentParentDoctor);
         InitItemUI(doctorGO, data);
         doctorDict[data.title] = doctorGO;
@@ -124,7 +125,7 @@ public class UIManager : MonoBehaviour
     }
 
     private void InitItemUI(GameObject go, ExerciseData data)
-    {
+    {Debug.LogWarning($"Initializing UI for exercise: {data.title}");
         go.name = "exercise_" + data.title;
         go.transform.Find("name")?.GetComponent<TMP_Text>().SetText(data.title);
         go.transform.Find("content")?.GetComponent<TMP_Text>().SetText(data.description);
@@ -152,8 +153,11 @@ public class UIManager : MonoBehaviour
     private void BindSend(GameObject go, string title)
     {
         var btn = FindButton(go.transform, "Send button");
-        if (btn != null)
-            btn.onClick.AddListener(() => SendExerciseToDoctor(title, btn));
+        if (btn != null) btn.onClick.AddListener(() => SendExerciseToDoctor(title, btn));
+        else
+        {
+            Debug.LogWarning("Send button not found in patient exercise prefab.");
+        }
     }
 
     private void BindFeedback(GameObject go, string title)
@@ -170,6 +174,7 @@ public class UIManager : MonoBehaviour
         // Doctor feedback content synchronized
         if (!doctorFbDict.ContainsKey(title))
         {
+            Debug.LogWarning($"Creating feedback UI for doctor exercise: {title}");
             var fbGO = Instantiate(doctorFeedbackPrefab, contentFeedbackDoctor);
             InitItemUI(fbGO, exerciseList.exercises.Find(e => e.title == title));
             BindFeedback(fbGO, title);
@@ -187,6 +192,7 @@ public class UIManager : MonoBehaviour
         // Patient feedback content synchronized
         if (!patientFbDict.ContainsKey(title))
         {
+            Debug.LogWarning($"Creating feedback UI for patient exercise: {title}");
             var perfGO = Instantiate(patientFeedbackPrefab, contentFeedbackPatient);
             InitItemUI(perfGO, exerciseList.exercises.Find(e => e.title == title));
 
@@ -399,10 +405,11 @@ public class UIManager : MonoBehaviour
         FindObjectsOfType<LineRenderer>().ToList();
         foreach (var line in FindObjectsOfType<LineRenderer>())
         {
-            if (line.gameObject.tag == "FeedbackLine")
+            if (line.gameObject.tag == "FeedbackLineRenderer")
             {
                 Debug.Log("remove feedback line: " + line.gameObject.name);
-                Destroy(line.gameObject);
+                // Destroy(line.gameObject);
+                line.positionCount = 0; // Clear the line instead of destroying it
             }
         }
     }
@@ -413,10 +420,10 @@ public class UIManager : MonoBehaviour
     {
         removeAllFeedbackLines();
 
-        onStopPlay();
-        onStopRecord();
-        onStopPlayFeedback();
-        onStopRecordFeedback();
+        // onStopPlay();
+        // onStopRecord();
+        // onStopPlayFeedback();
+        // onStopRecordFeedback();
 
         isPatient = isExerciseByPatient;
         patientString = isPatient ? "Patient_" : "Doctor_";
@@ -432,19 +439,20 @@ public class UIManager : MonoBehaviour
 
     public void onStartRecord(bool isExerciseByPatient) 
     {
-        onStopPlay();
-        onStopRecord();
-        onStopPlayFeedback();
-        onStopRecordFeedback();
+        // onStopPlay();
+        // //onStopRecord();
+        // onStopPlayFeedback();
+        // onStopRecordFeedback();
 
         isPatient = isExerciseByPatient;
-        if (currentExerciseTitle.Contains("Doctor") || currentExerciseTitle.Contains("Patient"))
-        {
-            var tempList = currentExerciseTitle.Split('_').ToList();
-            tempList.ForEach(ft => Debug.Log("june" + ft));
-            tempList.RemoveAt(0);
-            currentExerciseTitle = string.Join("_", tempList);
-        }
+         if (currentExerciseTitle.Contains("Doctor_")) currentExerciseTitle = currentExerciseTitle.Replace("Doctor_", "");
+      //if (currentExerciseTitle.Contains("Doctor") || currentExerciseTitle.Contains("Patient"))
+      //  {
+      //      var tempList = currentExerciseTitle.Split('_').ToList();
+      //      tempList.ForEach(ft => Debug.Log("june" + ft));
+      //      tempList.RemoveAt(0);
+      //      currentExerciseTitle = string.Join("_", tempList);
+      //  }
         jointTracker.NewExercise(currentExerciseTitle, isPatient);
         jointTracker.StartRecording();
     }
@@ -455,10 +463,10 @@ public class UIManager : MonoBehaviour
     {
         removeAllFeedbackLines();
         //onStopPlay();
-        onPausePlay();
-        onStopRecord();
-        onStopPlayFeedback();
-        onStopRecordFeedback();
+        // onPausePlay();
+        // onStopRecord();
+        // onStopPlayFeedback();
+        // onStopRecordFeedback();
 
         feedbackDrawing.SetExerciseName(currentExerciseTitle, playbackTime.ToString());
         feedbackDrawing.setRecordingOn();
@@ -477,9 +485,9 @@ public class UIManager : MonoBehaviour
         //onStopPlay();
         removeAllFeedbackLines();
 
-        onStopRecord();
-        onStopPlayFeedback();
-        onStopRecordFeedback();
+        // onStopRecord();
+        // onStopPlayFeedback();
+        // onStopRecordFeedback();
 
         jointPlayback.Seek(float.Parse(timestamp));
         onPausePlay();
