@@ -428,7 +428,8 @@ public class UIManager : MonoBehaviour
         isPatient = isExerciseByPatient;
         patientString = isPatient ? "Patient_" : "Doctor_";
         if (currentExerciseTitle.Contains("Patient") || currentExerciseTitle.Contains("Doctor")) patientString = "";
-
+        currentExerciseTitle = "Doctor_Bicepcurl"; // for testing, remove later
+        patientString = "";
         jointPlayback.SetRecordingToPlay(patientString + currentExerciseTitle);
         jointPlayback.Play();
 
@@ -480,6 +481,13 @@ public class UIManager : MonoBehaviour
 
         //recordAudio.StopRecording(currentExerciseTitle, playbackTime.ToString());
     }
+
+    public void JuneonPlayFeedBack()
+    {
+        jointPlayback.SetRecordingToPlay("Doctor_Bicepcurl");
+        jointPlayback.Play();
+        onStartPlayFeedback("Doctor_Bicepcurl", 3.291443.ToString()); // Example usage, replace with actual exercise name and timestamp
+    } 
     public void onStartPlayFeedback(string exerciseName, string timestamp) // already bound in movementRecordingsManager.cs
     {
         //onStopPlay();

@@ -26,7 +26,7 @@ public class MovementRecordingsManager : MonoBehaviour
         //{
         //    Debug.Log("Timestamp: " + timestamp);
         //}
-        //generateFeedBackUI(UImanager.contentFeedback, "Patient_dr");
+        generateFeedBackUI(UiManager.contentPlayFeedback , "Doctor_Bicepcurl");
     }
     public FeedbackList MakeFeedbackListFromFiles(string exerciseName) // exercisename should be like "Patient_DrawingExercise" or "Doctor_DrawingExercise"
     {
@@ -89,7 +89,7 @@ public class MovementRecordingsManager : MonoBehaviour
             GameObject newButton = Instantiate(feedbackButtonPrefab, content);
             newButton.name = "FeedbackButton_" + timestamp;
             newButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = timestamp;
-            newButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => UiManager.onStartPlayFeedback(exerciseName, timestamp));
+            newButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => UiManager.JuneonPlayFeedBack());
 
             GameObject feedbackIndicator = Instantiate(feedbackIndicatorPrefab, handleSlideArea);
             feedbackIndicator.GetComponent<RectTransform>().anchoredPosition = new Vector2(float.Parse(timestamp) * handleSlideArea.transform.parent.GetComponent<RectTransform>().rect.width / GetMaxPlaybackTime(exerciseName), 0);
