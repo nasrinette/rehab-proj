@@ -76,5 +76,3 @@ Make sure Meta XR packages and XR Plugin Management are enabled. If needed, refe
 * Yongyi Yang
 * Supervised by Daniel Medeiros
 
-```
-
