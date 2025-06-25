@@ -2,9 +2,7 @@
 
 A Unity-based prototype for asynchronous remote physiotherapy using immersive Virtual Reality (VR). This system enables doctors to create rehabilitation exercises, and patients to perform and receive visual/audio feedback, all within a shared but time-independent VR space.
 
-## 📽️ Demo
 
-Watch the video walkthrough here:  
 [▶️ Demo Video](https://drive.google.com/file/d/1Zt6HFJFRJ545JL7IzBt8j2wgi664Akpe/view?usp=sharing)
 
 
